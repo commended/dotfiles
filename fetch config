@@ -1,0 +1,91 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "file",
+    "source": "~/.config/fastfetch/my-logo.txt"
+  },
+  "display": {
+    "separator": " "
+  },
+  "modules": [
+    "title",
+    "separator",
+    {
+      "type": "custom",
+      "format": "Hardware"
+    },
+    { 
+      "type": "cpu",
+      "key": "├─ CPU",
+      "format": "{name}"
+    },
+    { 
+      "type": "gpu",
+      "key": "├─ GPU",
+      "format": "{name}"
+    },
+    { 
+      "type": "memory",
+      "key": "├─ Memory"
+    },
+    { 
+      "type": "battery",
+      "key": "└─ Power",
+      "format": "{4}"
+    },
+    { 
+      "type": "custom",
+      "format": ""
+    },
+    { 
+      "type": "custom",
+      "format": "Ricing"
+    },
+    { 
+      "type": "os",
+      "key": "├─ OS",
+      "format": "{name}"
+    },
+    { 
+      "type": "de",
+      "key": "├─ DE"
+    },
+    { 
+      "type": "wm",
+      "key": "├─ WM"
+    },
+    { 
+      "type": "terminal",
+      "key": "├─ Terminal",
+      "format": "{1}"
+    },
+    { 
+      "type": "terminalfont",
+      "key": "├─ Font",
+      "format": "{name} {size}pt"
+    },
+    { 
+      "type": "theme",
+      "key": "└─ Theme",
+      "format": "{1}"
+    },
+    { 
+      "type": "custom",
+      "format": ""
+    },
+    { 
+      "type": "custom",
+      "format": "Uptime"
+    },
+    { 
+      "type": "uptime",
+      "key": "├─ Uptime",
+      "format": "{hours} hours, {minutes} mins"
+    },
+    { 
+      "type": "datetime",
+      "key": "└─ Date",
+      "format": "{4}/{11}/{1}"
+    }
+  ]
+}
