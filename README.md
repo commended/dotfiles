@@ -1,2 +1,3 @@
-# ricing
-my rice config
+# my config
+
+work in progress
