@@ -1,0 +1,2 @@
+# ricing
+my rice config
