@@ -1,91 +1,85 @@
+// made by aug
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": {
-    "type": "file",
-    "source": "~/.config/fastfetch/my-logo.txt"
+    "type": "builtin",
+    "source": "debian",
+    "color": {
+      "1": "white",
+      "2": "white"
+    }
   },
   "display": {
-    "separator": " "
+    "separator": ">   ",
+    "color": {
+      "separator": "white"
+    },
+    "constants": [
+      "x_x"
+    ]
   },
   "modules": [
-    "title",
-    "separator",
     {
       "type": "custom",
-      "format": "Hardware"
+      "format": "{$1}"
     },
-    { 
-      "type": "cpu",
-      "key": "├─ CPU",
+    "break",
+    {
+      "key": "Distro         ",
+      "type": "os",
       "format": "{name}"
     },
-    { 
-      "type": "gpu",
-      "key": "├─ GPU",
-      "format": "{name}"
+    {
+      "key": "Environment    ",
+      "type": "de",
+      "format": "{pretty-name}"
     },
-    { 
-      "type": "memory",
-      "key": "├─ Memory"
+    {
+      "key": "Window Manager ",
+      "type": "wm"
     },
-    { 
+    {
+      "key": "Shell          ",
+      "type": "shell",
+      "format": "{1}"
+    },
+    {
+      "key": "Terminal       ",
+      "type": "terminal",
+    },
+    {
+      "key": "Display        ",
+      "type": "display",
+      "format": "{1}x{2} @{3}hz"
+    },
+    {
+      "key": "Charge         ",
       "type": "battery",
-      "key": "└─ Power",
       "format": "{4}"
     },
-    { 
-      "type": "custom",
-      "format": ""
+    {
+      "key": "Lifespan       ",
+      "type": "uptime"
     },
-    { 
-      "type": "custom",
-      "format": "Ricing"
-    },
-    { 
-      "type": "os",
-      "key": "├─ OS",
+    {
+      "key": "Cpu            ",
+      "type": "cpu",
       "format": "{name}"
     },
-    { 
-      "type": "de",
-      "key": "├─ DE"
+    {
+      "key": "Gpu            ",
+      "type": "gpu",
+      "format": "{name}"
     },
-    { 
-      "type": "wm",
-      "key": "├─ WM"
+    {
+      "key": "Ram            ",
+      "type": "memory"
     },
-    { 
-      "type": "terminal",
-      "key": "├─ Terminal",
-      "format": "{1}"
-    },
-    { 
-      "type": "terminalfont",
-      "key": "├─ Font",
-      "format": "{name} {size}pt"
-    },
-    { 
-      "type": "theme",
-      "key": "└─ Theme",
-      "format": "{1}"
-    },
-    { 
-      "type": "custom",
-      "format": ""
-    },
-    { 
-      "type": "custom",
-      "format": "Uptime"
-    },
-    { 
-      "type": "uptime",
-      "key": "├─ Uptime",
-      "format": "{hours} hours, {minutes} mins"
-    },
-    { 
-      "type": "datetime",
-      "key": "└─ Date",
-      "format": "{4}/{11}/{1}"
+    "break",
+    {
+      "type": "colors",
+      "paddingLeft": 7,
+      "symbol": "circle"
     }
   ]
 }
