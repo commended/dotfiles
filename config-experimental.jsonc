@@ -1,0 +1,124 @@
+//made by aug, written by hand
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "type": "file",
+        "source": "~/.config/fastfetch/my-logo.txt"
+    },
+    "display": {
+        "separator": "  ",
+        "constants": [
+            "╭────────────────────────────────────────────────────────────╮",
+            "╰────────────────────────────────────────────────────────────╯",
+            "                           aug!                               "
+        ]
+    },
+    "modules": [
+        {
+            "type": "custom",
+            "format": "{$3}",
+            "outputColor": "white"
+        },
+        "break",
+        {
+            "type": "custom",
+            "format": "{$1}",
+            "outputColor": "white"
+        },
+        "break",
+        {        
+            "type": "os",
+            "key": "   distro       ",
+            "keyColor": "white",
+            "format": "{name}"
+        },
+        {
+            "type": "wm",
+            "key": "   window mgmt  ",
+            "keyColor": "white",
+            "format": "{2}"
+        },
+        {
+            "type": "de",
+            "key": "   environment  ",
+            "keyColor": "white",
+            "format": "{2}"
+        },
+        {
+            "type": "shell",
+            "key": "   shell        ",
+            "keyColor": "white",
+            "format": "{1}"
+        },
+        {
+            "type": "terminal",
+            "key": "   terminal     ",
+            "keyColor": "white",
+            "format": "{3}"
+        },
+        {
+            "type": "custom",
+            "format": "{$2}",
+            "outputColor": "white"
+        },
+        "break",
+        {
+            "type": "custom",
+            "format": "{$1}",
+            "outputColor": "white"
+        },
+        "break",
+        {
+            "type": "cpu",
+            "key": "   cpu          ",
+            "keyColor": "white",
+            "format": "{1}"
+        },
+        {
+            "type": "gpu",
+            "key": "   gpu          ",
+            "keyColor": "white",
+            "format": "{name}"
+        },
+        {
+            "type": "memory",
+            "key": "   memory       ",
+            "keyColor": "white",
+            "format": "{used}/{total}"
+        },
+        {
+            "type": "disk",
+            "key": "   storage      ",
+            "keyColor": "white",
+            "format": "{1}/{2}"
+        },
+        {
+            "type": "display",
+            "key": "   res          ",
+            "keyColor": "white",
+            "format": "{1}x{2},{3}hz"
+        },
+        {
+            "type": "uptime",
+            "key": "   uptime       ",
+            "keyColor": "white"
+        },
+        {"type": "battery",
+            "key": "   battery      ",
+            "keyColor": "white",
+            "format": "{4} {5}"
+        },
+        {
+            "type": "custom",
+            "format": "{$2}",
+            "outputColor": "white"
+        },
+        "break",
+        "break",
+        {
+            "type": "colors",
+            "symbol": "circle",
+            "paddingLeft": 25
+        }
+    ]
+}
