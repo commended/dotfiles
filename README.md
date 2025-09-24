@@ -4,9 +4,9 @@ my dotfiles, enjoy!
 ## Contents
 
 -hyprlock                                                                                   
--waybar
--kitty
--wofi
--fastfetch
--more soon
+-waybar     
+-kitty        
+-wofi   
+-fastfetch      
+-more soon       
 
