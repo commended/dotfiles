@@ -3,7 +3,7 @@ my dotfiles, enjoy!
 
 ## Contents
 
--hyprlock
+-hyprlock                                                                                   
 -waybar
 -kitty
 -wofi
