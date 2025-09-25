@@ -1,8 +1,7 @@
 # ricing
 
-My personal Wayland/Hyprland dotfiles. Minimal, fast, and themed for a cohesive look. Feel free to fork or copy pieces you like.
-
-> NOTE: Always back up your existing configuration before replacing it with mine.
+My personal Wayland/Hyprland dotfiles
+> NOTE: Always back up your existing configuration
 
 ## Contents
 
@@ -47,13 +46,12 @@ ln -s ~/.dotfiles/kitty ~/.config/kitty
 ln -s ~/.dotfiles/wofi ~/.config/wofi
 ln -s ~/.dotfiles/fastfetch ~/.config/fastfetch
 
-```
 
 If you prefer copying instead of symlinking:
 ```bash
 cp -r hyprlock waybar kitty wofi fastfetch ~/.config/
 
-
+```
 ## Updating
 ```bash
 cd ~/.dotfiles
