@@ -13,6 +13,7 @@ Current components included:
 - fastfetch (system info banner)
 - zsh (system shell)
 - lazyvim (text editor)
+- starships (fetch prompt)
 - much more soon
 
 
