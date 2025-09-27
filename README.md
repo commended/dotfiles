@@ -11,7 +11,9 @@ Current components included:
 - kitty (terminal emulator config)
 - wofi (app launcher)
 - fastfetch (system info banner)
-- more soon
+- zsh (system shell)
+- lazyvim (text editor)
+- much more soon
 
 
 ## Prerequisites
