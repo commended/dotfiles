@@ -10,7 +10,7 @@ export WAYLAND_DISPLAY=wayland-1
 export XDG_SESSION_TYPE=wayland
 
 # Configuration
-WALLPAPER_DIR="/home/aug/media/wallpaper-selection/"
+WALLPAPER_DIR="<enter direcotry here>" 
 HYPRPAPER_CONFIG="$HOME/.config/hypr/hyprpaper.conf"
 CACHE_DIR="$HOME/.cache/wallpaper-selector"
 THUMBNAILS_DIR="$CACHE_DIR/thumbnails"
