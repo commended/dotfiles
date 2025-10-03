@@ -1,0 +1,112 @@
+# ~/.local/bin/wallpaper-selector
+
+# Debug logging
+exec 2>>/tmp/wallpaper-debug.log
+echo "=== Wallpaper selector started at $(date) ===" >> /tmp/wallpaper-debug.log
+
+# Set environment variables for Wayland/rofi compatibility
+export DISPLAY=:0
+export WAYLAND_DISPLAY=wayland-1
+export XDG_SESSION_TYPE=wayland
+
+# Configuration
+WALLPAPER_DIR="/home/aug/media/wallpaper-selection/"
+HYPRPAPER_CONFIG="$HOME/.config/hypr/hyprpaper.conf"
+CACHE_DIR="$HOME/.cache/wallpaper-selector"
+THUMBNAILS_DIR="$CACHE_DIR/thumbnails"
+
+# Create cache directory if it doesn't exist
+mkdir -p "$THUMBNAILS_DIR"
+
+# Function to generate thumbnail if it doesn't exist
+generate_thumbnail() {
+    local image="$1"
+    local filename=$(basename "$image")
+    local thumbnail="$THUMBNAILS_DIR/${filename%.*}.png"
+    
+    if [[ ! -f "$thumbnail" ]]; then
+        # Generate 380x380 thumbnail to match rofi icon size
+        convert "$image" -resize 380x380^ -gravity center -extent 380x380 -strip -quality 85 "$thumbnail" 2>/dev/null
+    fi
+    echo "$thumbnail"
+}
+
+# Function to set wallpaper and update colors
+set_wallpaper() {
+    local wallpaper="$1"
+    
+    # Set wallpaper with hyprpaper
+    pkill hyprpaper 2>/dev/null
+    cat > "$HYPRPAPER_CONFIG" << EOF
+preload = $wallpaper
+wallpaper = ,$wallpaper
+splash = false
+EOF
+    hyprpaper &
+    disown
+    
+    # Update pywal colorscheme
+    echo "Updating colors from wallpaper..."
+    wal -i "$wallpaper"
+    
+    # Save current wallpaper
+    echo "$wallpaper" > "$CACHE_DIR/current_wallpaper"
+}
+
+# Main function
+main() {
+    # Check dependencies
+    if [[ ! -d "$WALLPAPER_DIR" ]]; then
+        echo "Error: Wallpaper directory $WALLPAPER_DIR does not exist!"
+        exit 1
+    fi
+
+    for cmd in convert rofi hyprpaper wal; do
+        if ! command -v "$cmd" &> /dev/null; then
+            echo "Error: $cmd not found. Please install it."
+            exit 1
+        fi
+    done
+    
+    # Build wallpaper list with thumbnails
+    declare -A wallpaper_map
+    declare -a wallpaper_list
+    
+    while IFS= read -r -d '' image; do
+        filename=$(basename "$image")
+        display_name="${filename%.*}"
+        thumbnail=$(generate_thumbnail "$image")
+        
+        if [[ -f "$thumbnail" ]]; then
+            wallpaper_map["$display_name"]="$image"
+            wallpaper_list+=("$display_name")
+        fi
+    done < <(find "$WALLPAPER_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.bmp" -o -iname "*.webp" \) -print0 | sort -z)
+    
+    if [[ ${#wallpaper_list[@]} -eq 0 ]]; then
+        echo "No wallpapers found in $WALLPAPER_DIR"
+        exit 1
+    fi
+    
+    # Create rofi entries
+    entries=""
+    for name in "${wallpaper_list[@]}"; do
+        thumbnail="$THUMBNAILS_DIR/${name}.png"
+        entries+="${name}\0icon\x1f${thumbnail}\n"
+    done
+    
+    # Show rofi menu
+    THEME_PATH="$HOME/.config/rofi/wallpaper.rasi"
+    selected=$(printf "$entries" | rofi -dmenu -i -p "Select Wallpaper" -show-icons -theme "$THEME_PATH" 2>/dev/null)
+    
+    # Apply selection
+    if [[ -n "$selected" && -n "${wallpaper_map[$selected]}" ]]; then
+        echo "Setting wallpaper and updating colors..."
+        set_wallpaper "${wallpaper_map[$selected]}"
+    fi
+}
+
+# Run main function
+main "$@"
+
+echo "=== Wallpaper selector completed ===" >> /tmp/wallpaper-debug.log
