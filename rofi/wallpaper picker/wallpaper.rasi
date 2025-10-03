@@ -1,0 +1,94 @@
+configuration {
+    show-icons: true;
+}
+
+mainbox {
+    children: [listview, inputbar];
+}
+
+* {
+    /* Black and white theme */
+    background-color: #000000;
+    text-color: #ffffff;
+    font: "JetBrains Mono Italic 11";
+    /* Define missing background-alt variable */
+    background-alt: #1a1a1a;
+
+    /* Hardcoded black theme variables */
+    background: #000000;
+    foreground: #ffffff;
+    selected-normal-background: #333333;
+    selected-urgent-background: #555555;
+    selected-normal-foreground: #ffffff;
+}
+
+window {
+    width: 75%;
+    height: 38%;
+    border: 5px;
+    border-color: @background;
+    border-radius: 20px;
+    padding: 16px;
+    background-color: @background;
+}
+
+listview {
+    lines: 1;
+    columns: 4;
+    spacing: 40px;
+    padding: 10px;
+}
+
+element {
+    orientation: vertical;
+    spacing: 8px;
+    padding: 12px;
+    border-radius: 16px;
+    background-color: #000000;
+}
+
+element-icon {
+    size: 400px;
+    border-radius: 12px;
+    margin: 0px;
+}
+
+element-text {
+    horizontal-align: center;
+    margin: 8px 0px 0px 0px;
+    padding: 6px 8px;
+    background-color: #000000;
+    text-color: #ffffff;
+    border-radius: 12px;
+    font: "JetBrains Mono Italic 10";
+}
+
+element.selected {
+    background-color: @selected-normal-background;
+    border: none;
+}
+
+element.selected element-text {
+    background-color: @selected-urgent-background;
+    text-color: @selected-normal-foreground;
+    font: "JetBrains Mono Bold Italic 10";
+}
+
+inputbar {
+    children: [prompt, entry, num-filtered-rows];
+    spacing: 8px;
+    padding: 12px;
+    margin: 16px 0px 0px 0px;
+    background-color: @background-alt;
+    border-radius: 8px;
+}
+
+prompt {
+    text-color: @foreground;
+    font: "JetBrains Mono Italic 12";
+}
+
+num-filtered-rows {
+    text-color: @foreground;
+    font: "JetBrains Mono Italic 11";
+}
