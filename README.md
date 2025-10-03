@@ -14,16 +14,18 @@ Current components included:
 - zsh (system shell)
 - lazyvim (text editor)
 - starships (fetch prompt)
-- much more soon
+- rofi wallpaper slector
+- more soon!
 
 
 ## Prerequisites
 Make sure you have
 - Hyprland
 - hyprlock (if packaged separately)
+- hyprpaper
 - waybar (Wayland bar)
 - kitty
-- wofi (or rofi-wayland if you prefer)
+- wofi
 - fastfetch
 - wl-clipboard, grim, slurp (for screenshots / clipboard helpers)
 - swappy (optional screenshot editor)
@@ -31,6 +33,8 @@ Make sure you have
 - playerctl (media control)
 - NetworkManager + nm-applet (if using network tray icon)
 - FiraCode Nerd Font (or any Nerd Font) for icons/glyphs
+- rofi
+- ImageMagick
 
 ## Install (Quick Start)
 ```bash
