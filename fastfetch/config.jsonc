@@ -1,182 +1,114 @@
-//made by aug
-
 {
-    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-    "logo": {
-        "type": "builtin",
-        "source": "qubes",
-        "padding": {
-           "top": 3
-       }
-    },
-    "display": {
-        "separator": "  ",
-        "key": {
-            "type": "icon",
-            "paddingLeft": 3
-        },
-        "constants": [
-            "╭────────────────────────────────────────────────────────────╮",
-            "╰────────────────────────────────────────────────────────────╯",
-            "                           aug!                               ",
-            " @immo on tiktok @03ur on instagram @commended on github"
-        ]
-    },
-    "modules": [
-        {
-            "type": "custom",
-            "format": "{$3}",
-            "outputColor": "white"
-        },
-        "break",
-        {
-            "type": "custom",
-            "format": "{$4}",
-            "outputColor":"blink_"
-        },
-        {
-            "type": "custom",
-            "format": "{$1}",
-            "outputColor": "white"
-        },
-        
-        {        
-            "type": "os",
-            "key": "   distro       ",
-            "keyColor": "white",
-            "format": "{name}"
-        },
-        {
-            "type": "wm",
-            "key": "   window mgmt  ",
-            "keyColor": "white",
-            "format": "{2}"
-        },
-        {
-            "type": "de",
-            "key": "   environment  ",
-            "keyColor": "white",
-            "format": "{2}"
-        },
-        {
-            "type": "shell",
-            "key": "   shell        ",
-            "keyColor": "white",
-            "format": "{1}"
-        },
-        {
-            "type": "terminal",
-            "key": "   terminal     ",
-            "keyColor": "white",
-            "format": "{3}"
-        },
-        {
-            "type": "wmtheme",
-            "keyColor": "white",
-            "format": "{1}"
-        },
-        {
-            "type": "terminalfont",
-            "key": "   terminal font ",
-            "keyColor": "white",
-            "format": "{1}"
-        },
-        {
-            "type": "custom",
-            "format": "{$2}",
-            "outputColor": "white"
-        },
-        "break",
-        {
-            "type": "custom",
-            "format": "{$1}",
-            "outputColor": "white"
-        },
-        {
-            "type": "host",
-            "key": "  user           ",
-            "format": "{1}",
-            "keyColor": "white"
-        },
-        {
-            "type": "cpu",
-            "key": "   cpu          ",
-            "keyColor": "white",
-            "format": "{1}"
-        },
-        {
-            "type": "gpu",
-            "key": "   gpu          ",
-            "keyColor": "white",
-            "format": "{name}"
-        },
-        {
-            "type": "memory",
-            "key": "   memory       ",
-            "keyColor": "white",
-            "format": "{used}/{total}"
-        },
-        {
-            "type": "disk",
-            "key": "   storage      ",
-            "keyColor": "white",
-            "format": "{1}/{2}"
-        },
-        {
-            "type": "display",
-            "key": "   res          ",
-            "keyColor": "white",
-            "format": "{1}x{2},{3}hz"
-        },
-        {
-            "type": "uptime",
-            "key": "   uptime       ",
-            "keyColor": "white"
-        },
-        {"type": "battery",
-            "key": "   battery      ",
-            "keyColor": "white",
-            "format": "{4} {5}"
-        },
-        {
-            "type": "custom",
-            "format": "{$2}",
-            "outputColor": "white"
-        },
-        "break",
-        {
-            "type": "custom",
-            "format": "{$1}",
-            "outputColor": "white"
-        },
-        {
-            "type": "media",
-            "key": "media",
-            "format": "{1}",
-            "keyColor": "white"
-        },
-        {
-            "type": "sound",
-            "key": "audio",
-            "format": "{2},{3}",
-            "keyColor": "white"
-        },
-        {
-            "type": "bluetooth",
-            "key": "bluetooth",
-            "format": "{1}",
-            "keyColor": "white"
-        },
-        {
-            "type": "custom",
-            "format": "{$2}",
-            "outputColor": "white"
-        },
-        "break",
-        {
-            "type": "colors",
-            "symbol": "circle",
-            "paddingLeft": 25
-        }
-    ]
+"$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+"logo": {
+  "source": "/home/aug/Downloads/ricing/terninal/Eva vs Eye.gif",
+  "type": "kitty-icat",
+  "height": 80,
+  "width": 70,
+  "padding": {
+    "top": 0
+    }
+  },
+"display": {
+  "separator": " ➜  "
+},
+
+"modules": [
+  "break",
+  {
+    "type": "os",
+    "key": " DISTRO",
+    "keyColor": "31",
+    "format": "{name}"
+  },
+  {
+    "type": "kernel",
+    "key": " ├  ",
+    "keyColor": "31",
+    "format": "{1} {4}"
+  },
+  {
+    "type": "packages",
+    "key": " ├ 󰏖 ",
+    "keyColor": "31",
+  },
+  {
+    "type": "shell",
+    "key": " └  ",
+    "keyColor": "31",
+  },
+  "break",
+  {
+    "type": "wm",
+    "key": " DE/WM",
+    "keyColor": "32",
+  },
+  {
+    "type": "wmtheme",
+    "key": " ├ 󰉼 ",
+    "keyColor": "32",
+  },
+  {
+    "type": "icons",
+    "key": " ├ 󰀻 ",
+    "keyColor": "32",
+  },
+  {
+    "type": "cursor",
+    "key": " ├  ",
+    "keyColor": "32",
+  },
+  {
+    "type": "terminal",
+    "key": " ├  ",
+    "keyColor": "32",
+  },
+  {
+    "type": "terminalfont",
+    "key": " └  ",
+    "keyColor": "32",
+  },
+  "break",
+  {
+    "type": "host",
+    "format": "{2}",
+    "key": "󰌢 SYSTEM",
+    "keyColor": "33",
+  },
+  {
+    "type": "cpu",
+    "format": "{1} ({3}) @ {7} GHz",
+    "key": " ├  ",
+    "keyColor": "33",
+  },
+  {
+    "type": "gpu",
+    "format": "{2}",
+    "key": " ├ 󰢮 ",
+    "keyColor": "33",
+  },
+  {
+    "type": "memory",
+    "key": " ├  ",
+    "keyColor": "33",
+  },
+  {
+    "type": "swap",
+    "key": " ├ 󰓡 ",
+    "keyColor": "33",
+  },
+  {
+    "type": "disk",
+    "key": " ├ 󰋊 ",
+    "keyColor": "33",
+  },
+  {
+    "type": "display",
+    "key": " └  ",
+    "compactType": "original-with-refresh-rate",
+    "keyColor": "33",
+  },
+  "break",
+  "colors",
+]
 }
