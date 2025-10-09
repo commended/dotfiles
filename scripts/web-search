@@ -28,7 +28,7 @@ fi
 
 # URL encode the query
 if command -v jq &> /dev/null; then
-    encoded_query=$(echo "$query" | jq -sRr @uri)
+    encoded_query=$(echo -n "$query" | jq -sRr @uri)
 else
     # Fallback: simple URL encoding using sed
     encoded_query=$(echo "$query" | sed 's/ /+/g' | sed 's/&/%26/g')
