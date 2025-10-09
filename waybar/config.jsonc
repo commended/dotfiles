@@ -10,13 +10,12 @@
 
   "modules-left": [
     "custom/appmenuicon",
-    "hyprland/workspaces",
     "pulseaudio",
     "battery"
   ],
 
   "modules-center": [
-    "custom/media"
+    "hyprland/workspaces"
   ],
 
   "modules-right": [
@@ -25,6 +24,7 @@
     "bluetooth",
     "tray",
     "clock"
+
   ],
 
   "hyprland/workspaces": {
@@ -33,7 +33,7 @@
       "1": [], "2": [], "3": [], "4": [], "5": []
     },
     "format-icons": {
-      "1": "1", "2": "2", "3": "3", "4": "4", "5": "5"
+      "1": " " , "2": " ", "3": " ", "4": " ", "5": " " 
     }
   },
 
@@ -46,23 +46,14 @@
   },
 
   "custom/appmenuicon": {
-    "format": "",
+    "format": "",
     "on-click": "shutdown now",
     "tooltip": false
   },
 
-  "custom/media": {
-    "format": "[{text}]",
-    "format-no-player": "[~]",
-    "exec": "playerctl metadata --format '{{title}} - {{artist}}'",
-    "return-type": "text",
-    "on-click": "playerctl play-pause",
-    "on-click-right": "playerctl next",
-    "escape": true,
-    "max-length": 40,
-    "format-icons": ["♪"],
-    "interval": 1,
-    "tooltip": true
+  "hyprland/window": {
+    "format": "[{}]",
+    "max-length": 60
   },
 
   "tray": {
@@ -71,24 +62,24 @@
   },
 
   "pulseaudio": {
-    "format": " {volume}%  {format_source}",
-    "format-bluetooth": " {volume}%  {format_source}",
+    "format": " {volume}%",
+    "format-bluetooth": " {volume}%",
     "format-source": "",
-    "format-source-muted": "",
-    "format-muted": "  {format_source} ",
+    "format-source-muted": " ",
+    "format-muted": "  {format_source} ",
     "on-click-middle": "pavucontrol",
     "on-click": "pactl set-sink-mute alsa_output.pci-0000_02_00.6.analog-stereo toggle",
     "on-click-right": "pactl set-source-mute alsa_input.pci-0000_02_00.6.analog-stereo toggle",
     "format-icons": {
-      "default": [" "]
+      "default": [" "]
     }
   },
 
   "network": {
     "format-wifi": "",
     "format-ethernet": "󰈀",
-    "format-disconnected": "  Disconnected",
-    "on-click": "nmtui",
+    "format-disconnected": "󰤮",
+    "on-click": "kitty -e nmtui",
     "tooltip": true
   },
 
@@ -98,12 +89,21 @@
   },
 
   "battery": {
-    "format": "  {capacity}%",
+    "format": "  {capacity}%",
     "tooltip": true
   },
 
+  "custom/cpuhistory": {
+    "exec": "~/.config/waybar/scripts/cpu_history.py -d 60",
+    "format": "<span color='#FFFFFF'> </span>{}",
+    "interval": 1,
+    "return-type": "json",
+    "on-click": "~/.config/waybar/scripts/cpu_history.py toggle",
+    "max-length": 20
+  },
+
   "bluetooth": {
-    "format": "",
+    "format": "  ",
     "on-click": "blueman-manager",
     "tooltip": true
   }
