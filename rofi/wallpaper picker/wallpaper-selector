@@ -10,7 +10,7 @@ export WAYLAND_DISPLAY=wayland-1
 export XDG_SESSION_TYPE=wayland
 
 # Configuration
-WALLPAPER_DIR="<enter direcotry here>" 
+WALLPAPER_DIR="/home/aug/media/wallpaper-selection/"
 HYPRPAPER_CONFIG="$HOME/.config/hypr/hyprpaper.conf"
 CACHE_DIR="$HOME/.cache/wallpaper-selector"
 THUMBNAILS_DIR="$CACHE_DIR/thumbnails"
@@ -35,19 +35,32 @@ generate_thumbnail() {
 set_wallpaper() {
     local wallpaper="$1"
     
-    # Set wallpaper with hyprpaper
-    pkill hyprpaper 2>/dev/null
-    cat > "$HYPRPAPER_CONFIG" << EOF
-preload = $wallpaper
-wallpaper = ,$wallpaper
-splash = false
-EOF
-    hyprpaper &
-    disown
+    # Set wallpaper with hyprpaper (optimized for speed)
+    # Preload the wallpaper if not already loaded
+    if ! hyprctl hyprpaper listloaded | grep -q "$wallpaper"; then
+        hyprctl hyprpaper preload "$wallpaper"
+    fi
+    
+    # Set wallpaper instantly
+    hyprctl hyprpaper wallpaper ",$wallpaper"
     
     # Update pywal colorscheme
     echo "Updating colors from wallpaper..."
     wal -i "$wallpaper"
+    
+    # Reload waybar CSS to apply new colors (no restart needed)
+    echo "Reloading waybar colors..."
+    pkill -SIGUSR2 waybar 2>/dev/null
+    
+    # Reload Neovim colorscheme for any running instances
+    echo "Updating Neovim colors..."
+    for server in $(nvim --serverlist 2>/dev/null); do
+        nvim --server "$server" --remote-send '<Esc>:colorscheme wal<CR>' 2>/dev/null || true
+    done
+    
+    # Restart wofi to apply new colors (if running)
+    echo "Updating wofi colors..."
+    pkill wofi 2>/dev/null || true
     
     # Save current wallpaper
     echo "$wallpaper" > "$CACHE_DIR/current_wallpaper"
@@ -61,7 +74,7 @@ main() {
         exit 1
     fi
 
-    for cmd in convert rofi hyprpaper wal; do
+    for cmd in convert rofi hyprctl wal; do
         if ! command -v "$cmd" &> /dev/null; then
             echo "Error: $cmd not found. Please install it."
             exit 1
