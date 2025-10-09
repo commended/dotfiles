@@ -3,16 +3,13 @@ configuration {
 }
 
 mainbox {
-    children: [listview, inputbar];
+    children: [listview];
+    padding: 25% 0%;
 }
 
 * {
     /* Black and white theme */
-    background-color: #000000;
-    text-color: #ffffff;
-    font: "JetBrains Mono Italic 11";
-    /* Define missing background-alt variable */
-    background-alt: #1a1a1a;
+    background-color: transparent;
 
     /* Hardcoded black theme variables */
     background: #000000;
@@ -23,49 +20,45 @@ mainbox {
 }
 
 window {
-    width: 75%;
-    height: 38%;
-    border: 5px;
-    border-color: @background;
-    border-radius: 20px;
-    padding: 16px;
-    background-color: @background;
+    fullscreen: true;
+    background-color: transparent;
 }
 
 listview {
     lines: 1;
-    columns: 4;
-    spacing: 40px;
-    padding: 10px;
+    columns: 5;
+    spacing: 20px;
+    padding: 0px 10px;
+    flow: horizontal;
+    children: [element-icon];
 }
 
 element {
-    orientation: vertical;
+    orientation: horizontal;
     spacing: 8px;
-    padding: 12px;
-    border-radius: 16px;
-    background-color: #000000;
+    padding: 8px;
+    border-radius: 20px;
+    background-color: rgba(16, 16, 16, 0.8);
 }
 
 element-icon {
-    size: 400px;
-    border-radius: 12px;
+    size: 229px 540px;
     margin: 0px;
+    horizontal-align: 0;
 }
 
 element-text {
-    horizontal-align: center;
-    margin: 8px 0px 0px 0px;
-    padding: 6px 8px;
-    background-color: #000000;
+    margin: 0px;
+    padding: 4px 8px;
+    background-color: #101010;
     text-color: #ffffff;
-    border-radius: 12px;
-    font: "JetBrains Mono Italic 10";
+    font: "JetBrains Mono Medium 9";
 }
 
 element.selected {
     background-color: @selected-normal-background;
-    border: none;
+    border: 2px;
+    border-color: white;
 }
 
 element.selected element-text {
