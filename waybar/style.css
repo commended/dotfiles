@@ -1,26 +1,28 @@
+@import '/home/aug/.cache/wal/colors-waybar.css';
+
 * {
     border: none;
     border-radius: 13px;
-    font-family: "Dejavu", mono;
+    font-family: "JetBrains Mono", mono;
     font-size: 15px;
 }
 
 window#waybar {
     background: transparent;
-    color: #ffffff;
+    color: @foreground;
 }
 
 .modules-left {
-    background: #343434;
+    background: @color0;
     border-radius: 13px;
     padding: 1px 8px;
     margin: 5px 4px 0px 4px;
-    color: #ffffff;
+    color: @foreground;
 }
 
 .modules-center,
 .modules-right {
-    background: #232323;
+    background: @color0;
     border-radius: 13px;
     padding: 1px 8px;
     margin: 5px 4px 0px 4px;
@@ -29,20 +31,20 @@ window#waybar {
 #workspaces button {
     padding: 0px 5px;
     background: transparent;
-    color: #a89985;
+    color: @foreground;
     border-radius: 13px;
     transition: all 0.3s ease-in-out;
 }
 
 #workspaces button.active {
-    background: #504946;
-    color: #ffffff;
+    background: @color1;
+    color: @foreground;
     min-width: 34px;
     transition: all 0.3s ease-in-out;
 }
 
 #workspaces button:hover {
-    color: #cc242d;
+    color: @color2;
 }
 
 #workspaces button:nth-child(n+6) {
@@ -54,27 +56,27 @@ window#waybar {
 
 #custom-appmenuicon {
     font-size: 23px;
-    color: #ffffff;
+    color: @foreground;
     padding: 1px 20px 1px 0px;
 }
 
 #custom-spotify {
-    color: #d7c7a4;
+    color: @color3;
     padding: 1px 12px;
 }
 
 #custom-spotify:hover {
-    color: #cc242d;
+    color: @color1;
     transition: all 0.3s ease-in-out;
 }
 
 #pulseaudio {
     padding: 1px 6px 1px 12px;
-    color: #ffffff;
+    color: @foreground;
 }
 
 #pulseaudio.muted {
-    color: #cc242d;
+    color: @color1;
 }
 
 #clock {
@@ -91,7 +93,7 @@ window#waybar {
 }
 
 #keyboard-state label.locked {
-    color: #cc242d;
+    color: @color1;
 }
 
 #network {
@@ -99,3 +101,10 @@ window#waybar {
     font-weight: bold;
 }
 
+#custom-cpuhistory {
+    background: @color0;
+    border-radius: 13px;
+    padding: 1px 8px;
+    margin: 5px 4px 0px 4px;
+    color: @foreground;
+}
