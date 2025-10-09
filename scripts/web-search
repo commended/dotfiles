@@ -1,0 +1,44 @@
+#!/bin/bash
+# Web search script using wofi
+# Opens search query in default browser
+
+# Set environment variables for Wayland/wofi compatibility
+export DISPLAY=:0
+export WAYLAND_DISPLAY=wayland-1
+export XDG_SESSION_TYPE=wayland
+
+# Configuration - Choose your preferred search engine
+SEARCH_ENGINE="google"  # Options: google, brave, duckduckgo, bing
+
+# Search engine URLs
+declare -A SEARCH_URLS=(
+    ["google"]="https://www.google.com/search?q="
+    ["brave"]="https://search.brave.com/search?q="
+    ["duckduckgo"]="https://duckduckgo.com/?q="
+    ["bing"]="https://www.bing.com/search?q="
+)
+
+# Get search query from wofi
+query=$(wofi --show dmenu --prompt "Search" --lines 0)
+
+# Exit if no query entered
+if [[ -z "$query" ]]; then
+    exit 0
+fi
+
+# URL encode the query
+if command -v jq &> /dev/null; then
+    encoded_query=$(echo "$query" | jq -sRr @uri)
+else
+    # Fallback: simple URL encoding using sed
+    encoded_query=$(echo "$query" | sed 's/ /+/g' | sed 's/&/%26/g')
+fi
+
+# Build search URL
+search_url="${SEARCH_URLS[$SEARCH_ENGINE]}${encoded_query}"
+
+# Open in default browser
+xdg-open "$search_url" 2>/dev/null || \
+firefox "$search_url" 2>/dev/null || \
+chromium "$search_url" 2>/dev/null || \
+notify-send "Error" "Could not open browser"
