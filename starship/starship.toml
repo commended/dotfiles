@@ -1,22 +1,18 @@
 format = """
-[╭╴](bright-black)$username\
-$hostname\
-$directory\
-$git_branch\
-$git_state\
-$git_status\
-$cmd_duration\
-$line_break\
-$python\
-[╰─](bright-black) $character"""
+[╭](bright-black)$character$directory$cmd_duration$python
+[╰](bright-black)$character
+"""
 
 [directory]
 style = "bright-blue"
 
 [character]
-success_symbol = "[❯](purple)"
+success_symbol = "[>](purple)"
 error_symbol = "[❯](red)"
 vimcmd_symbol = "[❮](green)"
+
+[username]
+format = "{name}"
 
 [git_branch]
 format = "[$branch]($style)"
