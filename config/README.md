@@ -7,6 +7,7 @@ This directory contains the centralized configuration system for your Hyprland r
 - **settings.yaml** - Main configuration file with all settings
 - **settings-manager** - Interactive TUI for editing settings (press 'o' to open)
 - **open-settings** - Quick launcher script for the settings manager
+- **apply-settings** - Helper script to generate config snippets from settings.yaml
 
 ## Quick Start
 
@@ -33,9 +34,26 @@ In the editor:
 # Open config file in your editor
 ./config/settings-manager --config
 
+# Generate configuration snippets from settings
+./config/apply-settings
+
 # Show help
 ./config/settings-manager --help
 ```
+
+### Applying Settings
+
+After editing settings with the manager, use `apply-settings` to generate configuration snippets:
+
+```bash
+./config/apply-settings
+```
+
+This will:
+- Read your current settings from `~/.config/ricing/settings.yaml`
+- Generate Hyprland configuration snippets
+- Show you exactly what settings to add to your config files
+- Provide instructions for reloading components
 
 ## Configuration Categories
 

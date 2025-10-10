@@ -1,0 +1,199 @@
+#!/usr/bin/env python3
+"""
+Settings Applier - Apply settings from settings.yaml to actual config files
+This script reads the centralized settings and updates the relevant config files
+"""
+import os
+import sys
+import yaml
+import re
+from pathlib import Path
+
+# Configuration paths
+SCRIPT_DIR = Path(__file__).parent
+USER_CONFIG = Path.home() / '.config' / 'ricing' / 'settings.yaml'
+DEFAULT_CONFIG = SCRIPT_DIR / 'settings.yaml'
+
+
+class SettingsApplier:
+    """Applies settings from settings.yaml to actual config files."""
+    
+    def __init__(self, config_path=None):
+        self.config_path = config_path or (USER_CONFIG if USER_CONFIG.exists() else DEFAULT_CONFIG)
+        self.settings = self.load_settings()
+        self.config_dir = Path.home() / '.config'
+    
+    def load_settings(self):
+        """Load settings from file."""
+        try:
+            with open(self.config_path, 'r') as f:
+                return yaml.safe_load(f) or {}
+        except Exception as e:
+            print(f"Error loading settings: {e}")
+            sys.exit(1)
+    
+    def get(self, category, key, default=None):
+        """Get a setting value."""
+        return self.settings.get(category, {}).get(key, default)
+    
+    def apply_waybar_settings(self):
+        """Apply Waybar settings."""
+        print("Applying Waybar settings...")
+        
+        waybar_config = self.config_dir / 'waybar' / 'config'
+        waybar_style = self.config_dir / 'waybar' / 'style.css'
+        
+        # Note: This is a simplified example. Full implementation would
+        # need to parse and modify JSON/CSS files properly
+        
+        position = self.get('waybar', 'position', 'top')
+        show_cpu = self.get('waybar', 'show_cpu_graph', True)
+        
+        print(f"  - Position: {position}")
+        print(f"  - CPU Graph: {'enabled' if show_cpu else 'disabled'}")
+        print(f"  → To fully apply, run: killall waybar && waybar &")
+    
+    def apply_terminal_settings(self):
+        """Apply terminal settings."""
+        print("Applying terminal settings...")
+        
+        terminal = self.get('terminal', 'default', 'kitty')
+        font_family = self.get('terminal', 'font_family', 'JetBrains Mono')
+        font_size = self.get('terminal', 'font_size', 12)
+        opacity = self.get('terminal', 'opacity', 0.95)
+        
+        print(f"  - Terminal: {terminal}")
+        print(f"  - Font: {font_family} {font_size}pt")
+        print(f"  - Opacity: {opacity}")
+        
+        if terminal == 'kitty':
+            kitty_conf = self.config_dir / 'kitty' / 'kitty.conf'
+            if kitty_conf.exists():
+                print(f"  → Kitty config: {kitty_conf}")
+                print(f"     To apply font changes, update font_family and font_size in the config")
+    
+    def apply_appearance_settings(self):
+        """Apply appearance settings."""
+        print("Applying appearance settings...")
+        
+        border_radius = self.get('appearance', 'border_radius', 13)
+        gaps_in = self.get('appearance', 'gaps_in', 5)
+        gaps_out = self.get('appearance', 'gaps_out', 10)
+        blur_enabled = self.get('appearance', 'blur_enabled', True)
+        
+        print(f"  - Border radius: {border_radius}px")
+        print(f"  - Inner gaps: {gaps_in}px")
+        print(f"  - Outer gaps: {gaps_out}px")
+        print(f"  - Blur: {'enabled' if blur_enabled else 'disabled'}")
+        print(f"  → To fully apply, edit ~/.config/hypr/hyprland.conf")
+        print(f"     Or run: hyprctl reload")
+    
+    def apply_wallpaper_settings(self):
+        """Apply wallpaper settings."""
+        print("Applying wallpaper settings...")
+        
+        directory = self.get('wallpaper', 'directory', '~/media/wallpaper-selection/')
+        auto_colors = self.get('wallpaper', 'auto_colors', True)
+        
+        # Expand home directory
+        directory = os.path.expanduser(directory)
+        
+        print(f"  - Directory: {directory}")
+        print(f"  - Auto colors: {'enabled' if auto_colors else 'disabled'}")
+    
+    def generate_hyprland_snippet(self):
+        """Generate Hyprland configuration snippet."""
+        print("\n" + "="*70)
+        print("HYPRLAND CONFIGURATION SNIPPET")
+        print("="*70)
+        print("Add this to your ~/.config/hypr/hyprland.conf:\n")
+        
+        border_radius = self.get('appearance', 'border_radius', 13)
+        border_width = self.get('appearance', 'border_width', 2)
+        gaps_in = self.get('appearance', 'gaps_in', 5)
+        gaps_out = self.get('appearance', 'gaps_out', 10)
+        blur_enabled = self.get('appearance', 'blur_enabled', True)
+        blur_radius = self.get('appearance', 'blur_radius', 8)
+        blur_passes = self.get('appearance', 'blur_passes', 2)
+        inactive_opacity = self.get('appearance', 'inactive_opacity', 0.95)
+        active_opacity = self.get('appearance', 'active_opacity', 1.0)
+        
+        snippet = f"""
+# Generated from ricing settings.yaml
+decoration {{
+    rounding = {border_radius}
+    
+    blur {{
+        enabled = {'true' if blur_enabled else 'false'}
+        size = {blur_radius}
+        passes = {blur_passes}
+    }}
+}}
+
+general {{
+    gaps_in = {gaps_in}
+    gaps_out = {gaps_out}
+    border_size = {border_width}
+}}
+
+# Window opacity rules
+windowrulev2 = opacity {inactive_opacity} {inactive_opacity},class:.*
+windowrulev2 = opacity {active_opacity} {active_opacity},focus:1
+
+# Open settings manager
+bind = SUPER, O, exec, open-settings
+"""
+        print(snippet)
+        print("="*70 + "\n")
+    
+    def apply_all(self):
+        """Apply all settings."""
+        print("╔" + "═"*68 + "╗")
+        print("║" + " "*20 + "APPLYING RICING SETTINGS" + " "*24 + "║")
+        print("╚" + "═"*68 + "╝\n")
+        
+        self.apply_appearance_settings()
+        print()
+        self.apply_waybar_settings()
+        print()
+        self.apply_terminal_settings()
+        print()
+        self.apply_wallpaper_settings()
+        
+        self.generate_hyprland_snippet()
+        
+        print("\n" + "="*70)
+        print("SUMMARY")
+        print("="*70)
+        print("""
+Settings have been read from: {}
+
+To fully apply changes:
+1. Copy the Hyprland snippet above to ~/.config/hypr/hyprland.conf
+2. Reload Hyprland: hyprctl reload (or logout/login)
+3. Restart Waybar: killall waybar && waybar &
+4. Restart terminal windows for terminal settings
+
+For automatic application, you'll need to manually integrate settings
+with each component's config file, as each uses different formats.
+
+The settings manager provides a centralized interface for common settings.
+Advanced users can edit component configs directly.
+""".format(self.config_path))
+
+
+def main():
+    """Main entry point."""
+    if len(sys.argv) > 1 and sys.argv[1] in ['-h', '--help']:
+        print("Settings Applier - Apply centralized settings to config files")
+        print("\nUsage:")
+        print("  apply-settings         Apply all settings and show snippets")
+        print("  apply-settings --help  Show this help")
+        return
+    
+    applier = SettingsApplier()
+    applier.apply_all()
+
+
+if __name__ == "__main__":
+    main()

@@ -56,10 +56,8 @@ ln -s ~/.dotfiles/wofi ~/.config/wofi
 ln -s ~/.dotfiles/fastfetch ~/.config/fastfetch
 
 # 5. Install settings manager (optional but recommended)
-mkdir -p ~/.config/ricing ~/.local/bin
-ln -s ~/.dotfiles/config/settings.yaml ~/.config/ricing/settings.yaml
-ln -s ~/.dotfiles/config/settings-manager ~/.local/bin/settings-manager
-ln -s ~/.dotfiles/config/open-settings ~/.local/bin/open-settings
+cd ~/.dotfiles/config
+./install.sh
 
 
 If you prefer copying instead of symlinking:
