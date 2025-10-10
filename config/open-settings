@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Quick launcher for settings manager
+# This script can be bound to a key in Hyprland (e.g., SUPER + O)
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SETTINGS_MANAGER="$SCRIPT_DIR/settings-manager"
+
+# Check if settings-manager exists
+if [[ ! -f "$SETTINGS_MANAGER" ]]; then
+    # Try to find it in common locations
+    if [[ -f "$HOME/.config/ricing/settings-manager" ]]; then
+        SETTINGS_MANAGER="$HOME/.config/ricing/settings-manager"
+    elif [[ -f "$HOME/.dotfiles/config/settings-manager" ]]; then
+        SETTINGS_MANAGER="$HOME/.dotfiles/config/settings-manager"
+    else
+        notify-send "Settings Manager" "settings-manager script not found!" -u critical
+        exit 1
+    fi
+fi
+
+# Launch in terminal
+if command -v kitty >/dev/null 2>&1; then
+    kitty --title "Ricing Settings" -e "$SETTINGS_MANAGER"
+elif command -v alacritty >/dev/null 2>&1; then
+    alacritty --title "Ricing Settings" -e "$SETTINGS_MANAGER"
+else
+    # Fallback to any available terminal
+    x-terminal-emulator -e "$SETTINGS_MANAGER"
+fi

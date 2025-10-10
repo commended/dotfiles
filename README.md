@@ -15,6 +15,7 @@ Current components included:
 - lazyvim (text editor)
 - starship (fetch prompt)
 - rofi wallpaper slector
+- **config system** (centralized settings with interactive editor)
 - more soon!
 
 
@@ -35,6 +36,7 @@ Make sure you have
 - FiraCode Nerd Font (or any Nerd Font) for icons/glyphs
 - rofi
 - ImageMagick
+- Python 3.6+ with PyYAML (for settings manager)
 
 ## Install (Quick Start)
 ```bash
@@ -53,6 +55,12 @@ ln -s ~/.dotfiles/kitty ~/.config/kitty
 ln -s ~/.dotfiles/wofi ~/.config/wofi
 ln -s ~/.dotfiles/fastfetch ~/.config/fastfetch
 
+# 5. Install settings manager (optional but recommended)
+mkdir -p ~/.config/ricing ~/.local/bin
+ln -s ~/.dotfiles/config/settings.yaml ~/.config/ricing/settings.yaml
+ln -s ~/.dotfiles/config/settings-manager ~/.local/bin/settings-manager
+ln -s ~/.dotfiles/config/open-settings ~/.local/bin/open-settings
+
 
 If you prefer copying instead of symlinking:
 ```bash
@@ -67,7 +75,29 @@ git pull --rebase
 ```
 If you copied files instead of symlinking, re-copy the changed directories manually.
 
+## Configuration
+
+### Interactive Settings Manager
+
+Press **SUPER + O** to open the interactive settings editor (after adding the keybinding).
+
+To add the keybinding, add this to `~/.config/hypr/hyprland.conf`:
+```conf
+bind = SUPER, O, exec, open-settings
+```
+
+The settings manager provides a user-friendly interface to edit:
+- Appearance (borders, gaps, animations, blur, opacity)
+- Waybar settings (position, modules, CPU graph)
+- Terminal settings (font, size, opacity)
+- Wallpaper settings (directory, auto-colors)
+- Lock screen settings (timeout, display options)
+- And more!
+
+For advanced configuration, directly edit `~/.config/ricing/settings.yaml`. See [config/README.md](config/README.md) for full documentation.
+
 ## Customization Notes
 - Themes / Colors: Centralize palette variables in your Waybar css and reuse in kitty & wofi for consistency.
 - Fonts: Ensure a Nerd Font is installed; update kitty.conf + Waybar JSON accordingly.
 - Icons: Waybar modules may require Font Awesome or Material Design icons included in selected Nerd Font.
+- Settings: Use the interactive settings manager (SUPER + O) for basic configuration, or edit `~/.config/ricing/settings.yaml` for advanced options.

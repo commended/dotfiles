@@ -1,0 +1,338 @@
+#!/usr/bin/env python3
+"""
+Settings Manager - Interactive configuration tool for ricing dotfiles
+Press 'o' or run this script to open the settings editor
+"""
+import os
+import sys
+import yaml
+import curses
+from pathlib import Path
+from typing import Dict, Any, List, Tuple
+
+# Configuration paths
+CONFIG_DIR = Path(__file__).parent
+DEFAULT_CONFIG = CONFIG_DIR / 'settings.yaml'
+USER_CONFIG = Path.home() / '.config' / 'ricing' / 'settings.yaml'
+
+
+class SettingsManager:
+    """Manages loading, saving, and editing configuration settings."""
+    
+    def __init__(self, config_path=None):
+        self.config_path = config_path or USER_CONFIG
+        self.default_config_path = DEFAULT_CONFIG
+        self.settings = {}
+        self.load_settings()
+        
+    def load_settings(self):
+        """Load settings from file, falling back to defaults if needed."""
+        try:
+            # Try to load user config
+            if self.config_path.exists():
+                with open(self.config_path, 'r') as f:
+                    self.settings = yaml.safe_load(f) or {}
+            # Fall back to default config
+            elif self.default_config_path.exists():
+                with open(self.default_config_path, 'r') as f:
+                    self.settings = yaml.safe_load(f) or {}
+                # Save to user config location
+                self.save_settings()
+            else:
+                raise FileNotFoundError("No configuration file found")
+        except Exception as e:
+            print(f"Error loading settings: {e}")
+            sys.exit(1)
+    
+    def save_settings(self):
+        """Save current settings to user config file."""
+        try:
+            # Ensure config directory exists
+            self.config_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(self.config_path, 'w') as f:
+                yaml.dump(self.settings, f, default_flow_style=False, sort_keys=False)
+            return True
+        except Exception as e:
+            print(f"Error saving settings: {e}")
+            return False
+    
+    def get(self, category, key, default=None):
+        """Get a setting value."""
+        return self.settings.get(category, {}).get(key, default)
+    
+    def set(self, category, key, value):
+        """Set a setting value."""
+        if category not in self.settings:
+            self.settings[category] = {}
+        self.settings[category][key] = value
+
+
+class SettingsUI:
+    """Curses-based TUI for editing settings."""
+    
+    # Define editable basic settings (most commonly changed)
+    BASIC_SETTINGS = [
+        ('appearance', 'border_radius', 'Border Radius', 'int', 0, 50),
+        ('appearance', 'gaps_in', 'Inner Gaps', 'int', 0, 50),
+        ('appearance', 'gaps_out', 'Outer Gaps', 'int', 0, 50),
+        ('appearance', 'animation_speed', 'Animation Speed', 'int', 1, 10),
+        ('appearance', 'blur_enabled', 'Blur Effects', 'bool', None, None),
+        ('appearance', 'inactive_opacity', 'Inactive Opacity', 'float', 0.0, 1.0),
+        ('terminal', 'font_size', 'Terminal Font Size', 'int', 8, 24),
+        ('terminal', 'opacity', 'Terminal Opacity', 'float', 0.0, 1.0),
+        ('waybar', 'position', 'Waybar Position', 'choice', ['top', 'bottom'], None),
+        ('waybar', 'show_cpu_graph', 'Show CPU Graph', 'bool', None, None),
+        ('waybar', 'clock_format', 'Clock Format', 'choice', ['24h', '12h'], None),
+        ('launcher', 'default', 'Launcher', 'choice', ['wofi', 'rofi'], None),
+        ('wallpaper', 'auto_colors', 'Auto Colors from Wallpaper', 'bool', None, None),
+        ('lockscreen', 'timeout', 'Lock Timeout (minutes)', 'int', 1, 60),
+        ('notifications', 'timeout', 'Notification Timeout (seconds)', 'int', 1, 30),
+    ]
+    
+    def __init__(self, manager: SettingsManager):
+        self.manager = manager
+        self.current_row = 0
+        self.scroll_offset = 0
+        
+    def run(self, stdscr):
+        """Main UI loop."""
+        curses.curs_set(0)  # Hide cursor
+        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)  # Selected
+        curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)   # Header
+        curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Value
+        curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK) # Help
+        
+        while True:
+            stdscr.clear()
+            height, width = stdscr.getmaxyx()
+            
+            # Draw header
+            header = "═══ Ricing Settings Manager ═══"
+            stdscr.addstr(0, max(0, (width - len(header)) // 2), header, 
+                         curses.color_pair(2) | curses.A_BOLD)
+            
+            # Draw help text
+            help_text = "↑/↓: Navigate | Enter: Edit | s: Save | r: Reload | q: Quit"
+            stdscr.addstr(1, max(0, (width - len(help_text)) // 2), help_text,
+                         curses.color_pair(4))
+            
+            # Calculate visible area
+            visible_rows = height - 6  # Leave space for header and footer
+            
+            # Draw settings list
+            for idx, setting in enumerate(self.BASIC_SETTINGS):
+                if idx < self.scroll_offset or idx >= self.scroll_offset + visible_rows:
+                    continue
+                    
+                category, key, label, setting_type, min_val, max_val = setting
+                value = self.manager.get(category, key)
+                
+                row = idx - self.scroll_offset + 3
+                
+                # Format value display
+                if setting_type == 'bool':
+                    value_str = "✓" if value else "✗"
+                elif setting_type == 'choice':
+                    value_str = str(value)
+                else:
+                    value_str = str(value)
+                
+                # Build line
+                line = f"{label:.<35} {value_str}"
+                
+                # Highlight selected row
+                if idx == self.current_row:
+                    stdscr.addstr(row, 2, line[:width-4], curses.color_pair(1))
+                else:
+                    try:
+                        stdscr.addstr(row, 2, label[:width-20])
+                        stdscr.addstr(row, 37, value_str[:width-40], curses.color_pair(3))
+                    except:
+                        pass
+            
+            # Draw footer
+            footer_y = height - 2
+            footer = f"Advanced: Edit {self.manager.config_path}"
+            stdscr.addstr(footer_y, 2, footer[:width-4])
+            
+            # Get user input
+            key = stdscr.getch()
+            
+            if key == ord('q') or key == 27:  # q or ESC
+                break
+            elif key == curses.KEY_UP:
+                self.current_row = max(0, self.current_row - 1)
+                if self.current_row < self.scroll_offset:
+                    self.scroll_offset = self.current_row
+            elif key == curses.KEY_DOWN:
+                self.current_row = min(len(self.BASIC_SETTINGS) - 1, self.current_row + 1)
+                if self.current_row >= self.scroll_offset + visible_rows:
+                    self.scroll_offset = self.current_row - visible_rows + 1
+            elif key == ord('\n') or key == curses.KEY_ENTER:
+                self.edit_setting(stdscr)
+            elif key == ord('s'):
+                self.save_and_notify(stdscr)
+            elif key == ord('r'):
+                self.manager.load_settings()
+                self.show_notification(stdscr, "Settings reloaded!")
+            elif key == ord('o'):
+                pass  # Already in settings, do nothing
+    
+    def edit_setting(self, stdscr):
+        """Edit the currently selected setting."""
+        category, key, label, setting_type, min_val, max_val = self.BASIC_SETTINGS[self.current_row]
+        current_value = self.manager.get(category, key)
+        
+        height, width = stdscr.getmaxyx()
+        
+        # Create edit window
+        edit_h, edit_w = 7, 60
+        edit_y = (height - edit_h) // 2
+        edit_x = (width - edit_w) // 2
+        
+        edit_win = curses.newwin(edit_h, edit_w, edit_y, edit_x)
+        edit_win.box()
+        
+        if setting_type == 'bool':
+            # Toggle boolean
+            new_value = not current_value
+            self.manager.set(category, key, new_value)
+        elif setting_type == 'choice':
+            # Cycle through choices
+            choices = min_val  # min_val contains the list of choices
+            try:
+                current_idx = choices.index(current_value)
+                new_idx = (current_idx + 1) % len(choices)
+                new_value = choices[new_idx]
+            except (ValueError, IndexError):
+                new_value = choices[0]
+            self.manager.set(category, key, new_value)
+        else:
+            # Text input for int/float/string
+            edit_win.addstr(1, 2, f"Edit {label}:")
+            edit_win.addstr(2, 2, f"Current: {current_value}")
+            edit_win.addstr(3, 2, "New value:")
+            edit_win.addstr(5, 2, "Enter: Save | ESC: Cancel")
+            edit_win.refresh()
+            
+            # Get input
+            curses.echo()
+            curses.curs_set(1)
+            input_win = edit_win.subwin(1, edit_w - 6, edit_y + 4, edit_x + 2)
+            input_win.clear()
+            input_win.refresh()
+            
+            try:
+                input_str = input_win.getstr(0, 0, edit_w - 8).decode('utf-8')
+                
+                # Validate and convert
+                if setting_type == 'int':
+                    new_value = int(input_str)
+                    if min_val is not None and new_value < min_val:
+                        new_value = min_val
+                    if max_val is not None and new_value > max_val:
+                        new_value = max_val
+                elif setting_type == 'float':
+                    new_value = float(input_str)
+                    if min_val is not None and new_value < min_val:
+                        new_value = min_val
+                    if max_val is not None and new_value > max_val:
+                        new_value = max_val
+                else:
+                    new_value = input_str
+                
+                self.manager.set(category, key, new_value)
+            except (ValueError, KeyboardInterrupt):
+                pass  # Invalid input or cancelled
+            finally:
+                curses.noecho()
+                curses.curs_set(0)
+    
+    def save_and_notify(self, stdscr):
+        """Save settings and show notification."""
+        if self.manager.save_settings():
+            self.show_notification(stdscr, "Settings saved successfully!")
+        else:
+            self.show_notification(stdscr, "Error saving settings!")
+    
+    def show_notification(self, stdscr, message):
+        """Show a temporary notification."""
+        height, width = stdscr.getmaxyx()
+        msg_len = len(message) + 4
+        
+        notif_win = curses.newwin(3, msg_len, height // 2, (width - msg_len) // 2)
+        notif_win.box()
+        notif_win.addstr(1, 2, message)
+        notif_win.refresh()
+        
+        curses.napms(1500)  # Show for 1.5 seconds
+
+
+def main():
+    """Main entry point."""
+    # Check for command line arguments
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ['-h', '--help']:
+            print("Ricing Settings Manager")
+            print("\nUsage:")
+            print("  settings-manager          Open interactive editor")
+            print("  settings-manager --get CATEGORY.KEY")
+            print("  settings-manager --set CATEGORY.KEY VALUE")
+            print("  settings-manager --config PATH")
+            print("\nIn the interactive editor:")
+            print("  ↑/↓  - Navigate settings")
+            print("  Enter - Edit selected setting")
+            print("  s    - Save changes")
+            print("  r    - Reload settings")
+            print("  q    - Quit")
+            return
+        
+        manager = SettingsManager()
+        
+        if sys.argv[1] == '--get' and len(sys.argv) > 2:
+            # Get a setting value
+            parts = sys.argv[2].split('.')
+            if len(parts) == 2:
+                value = manager.get(parts[0], parts[1])
+                print(value)
+        elif sys.argv[1] == '--set' and len(sys.argv) > 3:
+            # Set a setting value
+            parts = sys.argv[2].split('.')
+            if len(parts) == 2:
+                # Try to parse value
+                value = sys.argv[3]
+                if value.lower() == 'true':
+                    value = True
+                elif value.lower() == 'false':
+                    value = False
+                elif value.isdigit():
+                    value = int(value)
+                else:
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        pass  # Keep as string
+                
+                manager.set(parts[0], parts[1], value)
+                if manager.save_settings():
+                    print(f"Set {sys.argv[2]} = {value}")
+        elif sys.argv[1] == '--config' and len(sys.argv) > 2:
+            # Open config file in editor
+            config_path = sys.argv[2] if sys.argv[2] else USER_CONFIG
+            editor = os.environ.get('EDITOR', 'nano')
+            os.system(f"{editor} {config_path}")
+        return
+    
+    # Launch interactive TUI
+    manager = SettingsManager()
+    ui = SettingsUI(manager)
+    
+    try:
+        curses.wrapper(ui.run)
+    except KeyboardInterrupt:
+        pass
+
+
+if __name__ == "__main__":
+    main()

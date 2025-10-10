@@ -1,0 +1,158 @@
+# Ricing Configuration File
+# This file contains all configurable settings for your Hyprland rice
+# Edit this file directly for advanced configuration options
+
+# Display Settings
+display:
+  # Monitor refresh rate (Hz)
+  refresh_rate: 144
+  # Monitor resolution (WIDTHxHEIGHT)
+  resolution: "1920x1080"
+  # Scale factor for HiDPI displays (1.0 = 100%, 1.5 = 150%, etc.)
+  scale: 1.0
+
+# Appearance
+appearance:
+  # Border radius for rounded corners (pixels)
+  border_radius: 13
+  # Border width (pixels)
+  border_width: 2
+  # Gaps between windows (pixels)
+  gaps_in: 5
+  gaps_out: 10
+  # Animation speed (1-10, higher is faster)
+  animation_speed: 7
+  # Enable blur effects
+  blur_enabled: true
+  # Blur radius (pixels)
+  blur_radius: 8
+  # Blur passes (more = better quality but slower)
+  blur_passes: 2
+  # Opacity for inactive windows (0.0-1.0)
+  inactive_opacity: 0.95
+  # Opacity for active windows (0.0-1.0)
+  active_opacity: 1.0
+
+# Waybar Settings
+waybar:
+  # Waybar position (top, bottom, left, right)
+  position: "top"
+  # Show CPU usage graph
+  show_cpu_graph: true
+  # CPU graph history depth
+  cpu_graph_depth: 40
+  # Show network status
+  show_network: true
+  # Show battery status
+  show_battery: true
+  # Show audio controls
+  show_audio: true
+  # Show clock
+  show_clock: true
+  # Clock format (24h or 12h)
+  clock_format: "24h"
+
+# Terminal Settings
+terminal:
+  # Default terminal emulator
+  default: "kitty"
+  # Font family
+  font_family: "JetBrains Mono"
+  # Font size
+  font_size: 12
+  # Background opacity (0.0-1.0)
+  opacity: 0.95
+  # Enable ligatures
+  ligatures: true
+
+# Application Launcher
+launcher:
+  # Launcher to use (wofi or rofi)
+  default: "wofi"
+  # Number of lines to display
+  lines: 10
+  # Launcher width (pixels)
+  width: 600
+  # Show icons
+  show_icons: true
+
+# Wallpaper Settings
+wallpaper:
+  # Wallpaper directory path
+  directory: "~/media/wallpaper-selection/"
+  # Auto-generate color schemes from wallpaper
+  auto_colors: true
+  # Wallpaper change interval in minutes (0 = disabled)
+  auto_change_interval: 0
+
+# Lock Screen
+lockscreen:
+  # Lock timeout in minutes
+  timeout: 10
+  # Enable lock on suspend
+  lock_on_suspend: true
+  # Show clock on lock screen
+  show_clock: true
+  # Clock format on lock screen
+  clock_format: "24h"
+
+# Keyboard & Input
+input:
+  # Keyboard repeat rate (characters per second)
+  repeat_rate: 50
+  # Keyboard repeat delay (milliseconds)
+  repeat_delay: 300
+  # Touchpad tap to click
+  tap_to_click: true
+  # Touchpad natural scrolling
+  natural_scroll: true
+  # Mouse acceleration
+  mouse_accel: 0.0
+
+# Keybindings
+# Note: These are simplified settings. For full keybinding customization,
+# edit ~/.config/hypr/hyprland.conf directly
+keybindings:
+  # Modifier key (SUPER, ALT, CTRL, SHIFT)
+  mod_key: "SUPER"
+  # Terminal
+  terminal: "SUPER, Return"
+  # Launcher
+  launcher: "SUPER, D"
+  # Close window
+  close: "SUPER, Q"
+  # Lock screen
+  lock: "SUPER, L"
+  # Screenshot area
+  screenshot: "SUPER, Print"
+
+# Notifications
+notifications:
+  # Notification timeout (seconds)
+  timeout: 5
+  # Notification position (top-right, top-left, bottom-right, bottom-left)
+  position: "top-right"
+  # Show notification history
+  show_history: true
+
+# Performance
+performance:
+  # Enable VRR (Variable Refresh Rate)
+  vrr_enabled: false
+  # Render backend (auto, vulkan, opengl)
+  render_backend: "auto"
+  # Enable hardware cursors
+  hardware_cursors: true
+
+# Startup Applications
+# Add applications to launch on startup
+startup_apps:
+  - "waybar"
+  - "hyprpaper"
+  - "dunst"
+
+# Custom Scripts
+# Paths to custom scripts that extend functionality
+scripts:
+  wallpaper_selector: "~/.local/bin/wallpaper-selector"
+  cpu_history: "~/.config/waybar/scripts/cpu_history.py"
