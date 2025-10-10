@@ -1,7 +1,7 @@
 # ricing
 
-My personal Wayland/Hyprland dotfiles
-> NOTE: Always back up your existing configuration
+My Wayland/Hyprland dotfiles
+> enjoy!
 
 ## Contents
 
@@ -13,7 +13,7 @@ Current components included:
 - fastfetch (system info banner)
 - zsh (system shell)
 - lazyvim (text editor)
-- starships (fetch prompt)
+- starship (fetch prompt)
 - rofi wallpaper slector
 - more soon!
 
