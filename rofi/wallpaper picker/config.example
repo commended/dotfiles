@@ -1,0 +1,10 @@
+# Wallpaper Selector Configuration
+# Copy this file to ~/.config/wallpaper-selector/config to customize
+
+# Enable or disable pywal color scheme updates
+# When true, wallpaper changes will update terminal and application colors
+# When false, only the wallpaper will change
+ENABLE_PYWAL="true"
+
+# Wallpaper directory (override the default)
+# WALLPAPER_DIR="/path/to/your/wallpapers"

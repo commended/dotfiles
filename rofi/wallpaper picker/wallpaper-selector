@@ -14,6 +14,15 @@ WALLPAPER_DIR="/home/aug/media/wallpaper-selection/"
 HYPRPAPER_CONFIG="$HOME/.config/hypr/hyprpaper.conf"
 CACHE_DIR="$HOME/.cache/wallpaper-selector"
 THUMBNAILS_DIR="$CACHE_DIR/thumbnails"
+CONFIG_FILE="$HOME/.config/wallpaper-selector/config"
+
+# Default settings
+ENABLE_PYWAL="${ENABLE_PYWAL:-true}"
+
+# Load config file if it exists
+if [[ -f "$CONFIG_FILE" ]]; then
+    source "$CONFIG_FILE"
+fi
 
 # Create cache directory if it doesn't exist
 mkdir -p "$THUMBNAILS_DIR"
@@ -44,23 +53,27 @@ set_wallpaper() {
     # Set wallpaper instantly
     hyprctl hyprpaper wallpaper ",$wallpaper"
     
-    # Update pywal colorscheme
-    echo "Updating colors from wallpaper..."
-    wal -i "$wallpaper"
-    
-    # Reload waybar CSS to apply new colors (no restart needed)
-    echo "Reloading waybar colors..."
-    pkill -SIGUSR2 waybar 2>/dev/null
-    
-    # Reload Neovim colorscheme for any running instances
-    echo "Updating Neovim colors..."
-    for server in $(nvim --serverlist 2>/dev/null); do
-        nvim --server "$server" --remote-send '<Esc>:colorscheme wal<CR>' 2>/dev/null || true
-    done
-    
-    # Restart wofi to apply new colors (if running)
-    echo "Updating wofi colors..."
-    pkill wofi 2>/dev/null || true
+    # Update pywal colorscheme (if enabled)
+    if [[ "$ENABLE_PYWAL" == "true" ]]; then
+        echo "Updating colors from wallpaper..."
+        wal -i "$wallpaper"
+        
+        # Reload waybar CSS to apply new colors (no restart needed)
+        echo "Reloading waybar colors..."
+        pkill -SIGUSR2 waybar 2>/dev/null
+        
+        # Reload Neovim colorscheme for any running instances
+        echo "Updating Neovim colors..."
+        for server in $(nvim --serverlist 2>/dev/null); do
+            nvim --server "$server" --remote-send '<Esc>:colorscheme wal<CR>' 2>/dev/null || true
+        done
+        
+        # Restart wofi to apply new colors (if running)
+        echo "Updating wofi colors..."
+        pkill wofi 2>/dev/null || true
+    else
+        echo "Pywal color updates disabled (ENABLE_PYWAL=false)"
+    fi
     
     # Save current wallpaper
     echo "$wallpaper" > "$CACHE_DIR/current_wallpaper"

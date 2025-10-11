@@ -31,7 +31,9 @@ alias yazi='flatpak run io.github.sxyazi.yazi'
 alias bonzai='cbonsai -l -m aug!'
 
 # Import pywal colors
-(cat ~/.cache/wal/sequences &)
+if [[ -f ~/.cache/wal/sequences ]]; then
+    (cat ~/.cache/wal/sequences &)
+fi
 
 # Desktop Environment specific configurations
 if [[ "$XDG_CURRENT_DESKTOP" == "KDE" ]] || [[ "$XDG_CURRENT_DESKTOP" == *"plasma"* ]]; then
