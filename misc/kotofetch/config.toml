@@ -1,0 +1,17 @@
+[display]
+horizontal_padding = 3
+vertical_padding = 1
+width = 50
+show_translation = "romaji"
+quote_color = "#a3be8c"
+translation_color = "dim"
+border_color = "#be8ca3"
+font_size = "small"
+bold = true
+border = false
+rounded_border = true
+source = true
+modes = ["lyrics"]
+seed = 0
+centered = true
+dynamic = false
