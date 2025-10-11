@@ -35,6 +35,7 @@ Make sure you have
 - FiraCode Nerd Font (or any Nerd Font) for icons/glyphs
 - rofi
 - ImageMagick
+- pywal (optional, for dynamic color scheme generation)
 
 ## Install (Quick Start)
 ```bash
@@ -71,3 +72,4 @@ If you copied files instead of symlinking, re-copy the changed directories manua
 - Themes / Colors: Centralize palette variables in your Waybar css and reuse in kitty & wofi for consistency.
 - Fonts: Ensure a Nerd Font is installed; update kitty.conf + Waybar JSON accordingly.
 - Icons: Waybar modules may require Font Awesome or Material Design icons included in selected Nerd Font.
+- Pywal Integration: The wallpaper selector can automatically update your color scheme using pywal. See `rofi/wallpaper picker/README.md` for configuration options.
