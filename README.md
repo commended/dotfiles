@@ -4,24 +4,24 @@ My Wayland/Hyprland dotfiles – A complete rice configuration for a beautiful L
 
 > **enjoy!**
 
-## 🎨 What's Included
+## What's Included
 
 This dotfiles repository includes configurations for:
 
-- **🔒 hyprland** - Main window manager configuration (including hyprlock & hyprpaper)
-- **📊 waybar** - Sleek status bar with custom modules
-- **⌨️ kitty** - Fast GPU-accelerated terminal emulator
-- **🚀 wofi** - Application launcher
-- **📋 rofi** - Wallpaper selector and more
-- **📈 fastfetch** - System information display
-- **🐚 zsh** - Enhanced shell configuration
-- **✨ starship** - Beautiful shell prompt
-- **📝 nvim** - LazyVim text editor setup
-- **🎵 rmpc** - MPD client configuration
-- **🎨 cava** - Console audio visualizer
-- **📁 yazi** - Terminal file manager
+- **hyprland** - Main window manager configuration (including hyprlock & hyprpaper)
+- **waybar** - Sleek status bar with custom modules
+- **kitty** - Fast GPU-accelerated terminal emulator
+- **wofi** - Application launcher
+- **rofi** - Wallpaper selector and more
+- **fastfetch** - System information display
+- **zsh** - Enhanced shell configuration
+- **starship** - Beautiful shell prompt
+- **nvim** - LazyVim text editor setup
+- **rmpc** - MPD client configuration
+- **cava** - Console audio visualizer
+- **yazi** - Terminal file manager
 
-## 📋 Prerequisites
+## Prerequisites
 
 ### Core Requirements
 These are essential for the basic setup:
@@ -53,6 +53,28 @@ For full functionality, install these tools:
 - `playerctl` - Media player control
 - `NetworkManager` + `nm-applet` - Network management
 
+**Programming languages and package managers:**
+- `rust` and `cargo` - Required for Rust-based tools (rmpc, basalt, kotofetch, dotter)
+- `python3` - Required for Python scripts
+- `python3-psutil` or `python-psutil` - Python library for system monitoring (used in waybar scripts)
+
+**Color scheme and theming:**
+- `pywal` (python-pywal) - Dynamic colorscheme generator, required by zsh configuration
+  ```bash
+  # Arch Linux / Manjaro
+  sudo pacman -S python-pywal
+  
+  # Fedora
+  sudo dnf install python3-pywal
+  
+  # Ubuntu / Debian
+  pip3 install pywal
+  ```
+
+**Music and audio:**
+- `mpd` (Music Player Daemon) - Required for rmpc music client
+- `mpc` - Command-line MPD client (optional, for controlling mpd)
+
 **Fonts:**
 - A Nerd Font (e.g., FiraCode Nerd Font) - Required for icons/glyphs
 - Install from [Nerd Fonts](https://www.nerdfonts.com/)
@@ -61,9 +83,14 @@ For full functionality, install these tools:
 - `nvim` (Neovim) - For text editing
 - `cava` - Audio visualizer
 - `yazi` - File manager
+- `thunar` - GUI file manager (referenced in zsh aliases)
 - `ImageMagick` - Image manipulation for scripts
+- `cbonsai` - Terminal bonsai tree (decorative)
+- `tty-clock` - Terminal clock (decorative)
+- `pipes.sh` - Terminal pipes screensaver (decorative)
+- `asciiquarium` - Terminal aquarium (decorative)
 
-## 🚀 Installation
+## Installation
 
 ### Quick Install (Recommended)
 
@@ -113,7 +140,7 @@ cp zsh/.zshrc ~/
 
 **Note:** With this method, you'll need to manually update files when pulling changes.
 
-## 🔄 Updating
+## Updating
 
 With symlinks (recommended method):
 ```bash
@@ -131,7 +158,7 @@ cp -r waybar kitty wofi rofi fastfetch ~/.config/
 cp zsh/.zshrc ~/
 ```
 
-## 🎨 Customization
+## Customization
 
 ### Color Themes
 - Most color schemes use consistent variables across components
@@ -150,7 +177,7 @@ cp zsh/.zshrc ~/
 - Main keybindings are in `~/.config/hypr/hyprland.conf`
 - Customize to your preferences
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 **Icons not displaying?**
 - Install a Nerd Font and configure it in your terminal and Waybar
@@ -167,16 +194,16 @@ cp zsh/.zshrc ~/
 - Make sure Starship is installed: `starship --version`
 - Source your config: `source ~/.zshrc`
 
-## 📝 Notes
+## Notes
 
 - Some scripts may reference absolute paths - update these to match your system
 - The setup assumes a Wayland/Hyprland environment
 - Not all components are required - feel free to pick and choose what you need
 
-## 📜 License
+## License
 
 Feel free to use, modify, and share these dotfiles!
 
 ---
 
-**Enjoy your rice! 🍚**
+**Enjoy your rice!**
