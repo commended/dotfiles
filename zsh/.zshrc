@@ -1,3 +1,32 @@
+# .zshrc
+
+# Prioritized: pywal colors, kitty config, and ffh
+if [[ -f ~/.cache/wal/sequences ]]; then
+    cat ~/.cache/wal/sequences
+else
+    echo 'pywal color sequences not found!'
+    return 1
+fi
+
+
+# Always set up Kitty config and aliases
+alias kitty-config='$EDITOR ~/.config/kitty/kitty.conf'
+alias term='kitty'
+alias terminal='kitty'
+export TERMINAL=kitty
+export KITTY_CONFIG_DIRECTORY=~/.config/kitty
+export KITTY_CONFIG_FILE=~/.config/kitty/kitty.conf
+
+# Fastfetch configuration
+alias ff='fastfetch'
+alias ffm='fastfetch --config ~/.config/fastfetch/config-minimal.jsonc'
+alias ffnl='fastfetch --config ~/.config/fastfetch/config-nologo.jsonc'
+alias ffh='clear && fastfetch --config ~/.config/fastfetch/config-hyprland.jsonc'
+alias personalfetch='/usr/local/bin/afetch' #WORK IN PROGRESS
+alias animatedfetch='brrtfetch /home/aug/Downloads/ricing/terninal/debian.gif'
+
+
+# Source global definitions (zsh equivalent)
 if [[ -f /etc/zshrc ]]; then
     source /etc/zshrc
 elif [[ -f /etc/zsh/zshrc ]]; then
@@ -10,6 +39,7 @@ if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]; then
 fi
 export PATH
 
+# Source additional configuration files from ~/.zshrc.d (zsh equivalent of ~/.bashrc.d)
 if [[ -d ~/.zshrc.d ]]; then
     for rc in ~/.zshrc.d/*; do
         if [[ -f "$rc" ]]; then
@@ -22,100 +52,60 @@ unset rc
 # Common aliases and settings
 alias clock='tty-clock -c -C 7 -s -n'
 alias pipes='pipes.sh'
-alias ff='fastfetch'
-alias ffm='fastfetch --config ~/.config/fastfetch/config-minimal.jsonc'
-alias ffnl='ff --config ~/.config/fastfetch/config-nologo.jsonc'
-alias ffh='ff --config ~/.config/fastfetch/config-hyprland.jsonc'
 alias ocean='asciiquarium'
-alias yazi='flatpak run io.github.sxyazi.yazi'
 alias bonzai='cbonsai -l -m aug!'
+alias project='/home/aug/projects/mp3_player.sh'
+alias music='~/.cargo/bin/rmpc'
+alias basalt='/home/aug/.cargo/bin/basalt'
+alias koto='/home/aug/.cargo/bin/kotofetch'
+alias dotter='/home/aug/.cargo/bin/dotter'
+alias shell='nvim ~/.zshrc'
 
-# Import pywal colors
-(cat ~/.cache/wal/sequences &)
 
-# Desktop Environment specific configurations
-if [[ "$XDG_CURRENT_DESKTOP" == "KDE" ]] || [[ "$XDG_CURRENT_DESKTOP" == *"plasma"* ]]; then
-    # KDE Plasma-specific settings
-    export PS1="> "
-    alias dolphin-here='dolphin . &'
-    alias kde-theme='lookandfeeltool -l'
-    alias plasma-theme='plasma-theme -l'
-    
-    # KDE Kitty configuration
-    if command -v kitty >/dev/null 2>&1; then
-        alias kitty-config='$EDITOR ~/.config/kitty/kitty.conf'
-        alias term='kitty'
-        alias terminal='kitty'
-        export TERMINAL=kitty
-        export KITTY_CONFIG_FILE=~/.config/kitty/kitty.conf
-    fi
-    
-    # KDE-specific fastfetch on login
-    ff
+# Desktop Environment: Hyprland only
+PS1="> "
+alias waybar-reload='killall waybar && waybar &'
+alias hypr-reload='hyprctl reload'
+alias hypr-config='$EDITOR ~/.config/hypr/hyprland.conf'
+alias wofi-run='wofi --show drun'
+alias file-manager='thunar . &'
+alias screenshot='grim ~/Pictures/screenshot-$(date +%Y%m%d_%H%M%S).png'
+alias screenshot-area='grim -g "$(slurp)" ~/Pictures/screenshot-$(date +%Y%m%d_%H%M%S).png'
+alias wallpaperswitcher='wallpaper-selector'
 
-elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]] || [[ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
-    # Hyprland-specific settings
-    PS1="> "
-    alias waybar-reload='killall waybar && waybar &'
-    alias hypr-reload='hyprctl reload'
-    alias hypr-config='$EDITOR ~/.config/hypr/hyprland.conf'
-    alias wofi-run='wofi --show drun'
-    alias file-manager='thunar . &'
-    alias screenshot='grim ~/Pictures/screenshot-$(date +%Y%m%d_%H%M%S).png'
-    alias screenshot-area='grim -g "$(slurp)" ~/Pictures/screenshot-$(date +%Y%m%d_%H%M%S).png'
-    alias wallpaperswitcher='wallpaper-selector'
-    
-    # Hyprland Kitty configuration
-    if command -v kitty >/dev/null 2>&1; then
-        alias kitty-config='$EDITOR ~/.config/kitty/kitty-hyprland.conf'
-        alias term='kitty'
-        alias terminal='kitty'
-        export TERMINAL=kitty
-        export KITTY_CONFIG_DIRECTORY=~/.config/kitty
-        export KITTY_CONFIG_FILE=~/.config/kitty/kitty-hyprland.conf
-    fi
-    
-    # Hyprland environment variables
-    export MOZ_ENABLE_WAYLAND=1
-    export QT_QPA_PLATFORM=wayland
-    export XDG_SESSION_TYPE=wayland
-    
-    # Hyprland-specific fastfetch on login
-    ffh
+# Hyprland environment variables
+export MOZ_ENABLE_WAYLAND=1
+export QT_QPA_PLATFORM=wayland
+export XDG_SESSION_TYPE=wayland
 
-else
-    # Default settings for other desktop environments
-    export PS1="# "
-    
-    # Default Kitty configuration
-    if command -v kitty >/dev/null 2>&1; then
-        alias kitty-config='$EDITOR ~/.config/kitty/kitty.conf'
-        alias term='kitty'
-        alias terminal='kitty'
-        export KITTY_CONFIG_FILE=~/.config/kitty/kitty.conf
-    fi
-    
-    ffnl
-fi
-
+# Initialize starship prompt (same as bash)
 eval "$(starship init zsh)"
 
-# Optional: Add some zsh-specific enhancements
-# Uncomment these if you want to take advantage of zsh features
-
-# Basic zsh options
-# setopt AUTO_CD              # cd just by typing directory name
-# setopt CORRECT              # spelling correction
-# setopt HIST_VERIFY          # verify history expansion before executing
-# setopt SHARE_HISTORY        # share history between sessions
-# setopt APPEND_HISTORY       # append to history file
-# setopt INC_APPEND_HISTORY   # add commands to history immediately
+# Zsh performance optimizations and features
+setopt AUTO_CD                # cd just by typing directory name
+setopt CORRECT                # spelling correction
+setopt HIST_VERIFY            # verify history expansion before executing
+setopt SHARE_HISTORY          # share history between sessions
+setopt APPEND_HISTORY         # append to history file
+setopt INC_APPEND_HISTORY     # add commands to history immediately
+setopt HIST_IGNORE_DUPS       # ignore duplicate commands
+setopt HIST_REDUCE_BLANKS     # remove superfluous blanks
+setopt NO_BEEP                # disable beep
 
 # History configuration
-# HISTFILE=~/.zsh_history
-# HISTSIZE=10000
-# SAVEHIST=10000
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
 
-# Enable completion system
-# autoload -Uz compinit
-# compinit
+# Fast completion system with caching
+autoload -Uz compinit
+# Only regenerate compdump once a day for performance
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+    compinit
+else
+    compinit -C
+fi
+
+# Enable completion caching
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
