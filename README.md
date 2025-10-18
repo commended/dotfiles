@@ -2,7 +2,12 @@
 
 My Wayland/Hyprland dotfiles – A complete rice configuration for a beautiful Linux desktop experience.
 
-> **enjoy!**
+> **showcase**
+
+![](https://github.com/commended/ricing/blob/main/misc/showcase/layoutshowcase.png)
+![](https://github.com/commended/ricing/blob/main/misc/showcase/nvimshowcase.png)
+![](https://github.com/commended/ricing/blob/main/misc/showcase/wallshowcase.png)
+![](https://github.com/commended/ricing/blob/main/misc/showcase/browsershowcase.png)
 
 ## What's Included
 
