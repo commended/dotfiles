@@ -1,110 +1,84 @@
 {
-  "layer": "top",
-  "margin-top": 0,
-  "margin-bottom": 0,
-  "margin-left": 0,
-  "margin-right": 100,
-  "spacing": 0,
+    "layer": "top",
+    "spacing": 0,
+    "height": 0,
 
-  "font-family": "Fira Mono, JetBrains Mono, monospace",
+    "margin-top": 10,
+    "margin-right": 10,
+    "margin-bottom": 0,
+    "margin-left": 10,
 
-  "modules-left": [
-    "custom/appmenuicon",
-    "pulseaudio",
-    "battery"
-  ],
+    "modules-left": [
+        "custom/launcher",
+        "hyprland/workspaces"
+    ],
 
-  "modules-center": [
-    "hyprland/workspaces"
-  ],
+    "modules-center": [
+        "clock"
+    ],
 
-  "modules-right": [
-    "network",
-    "custom/space-right",
-    "bluetooth",
-    "tray",
-    "clock"
+    "modules-right": [
+        "tray",
+        "battery",
+        "network",
+        "pulseaudio",
+		    "custom/control"
+    ],
 
-  ],
-
-  "hyprland/workspaces": {
-    "format": "{icon}",
-    "persistent-workspaces": {
-      "1": [], "2": [], "3": [], "4": [], "5": []
+    "custom/launcher":{
+        "format": " ",
+        "on-click": "~/.local/bin/wallpaper-selector",
+        "tooltip": false
     },
-    "format-icons": {
-      "1": " " , "2": " ", "3": " ", "4": " ", "5": " " 
+
+    "hyprland/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
+        "tooltip": false,
+        "persistent-workspaces": {
+          "1": [],"2": [],"3": [], "4": [], "5": [] 
+        }
+    },
+
+    "clock": {
+        "format": "{:%H:%M}",
+        "tooltip": false
+    },
+
+    "battery": {
+      "format": "   {capacity}%",
+      "tooltip": true
+    },
+
+    "tray": {
+      "tooltip": true
+    },
+
+    "network": {
+      "format-wifi": " ",
+      "format-ethernet": "󰈀 ",
+      "format-disconnected": "󰤮 ",
+      "on-click": "kitty -e nmtui",
+      "tooltip": true
+    },
+
+    "pulseaudio": {
+      "format": "  {volume}%",
+      "format-bluetooth": "   {volume}%",
+      "format-source": "",
+      "format-source-muted": " ",
+      "format-muted": "  {format_source} ",
+      "on-click-middle": "pavucontrol",
+      "on-click": "pactl set-sink-mute alsa_output.pci-0000_02_00.6.analog-stereo toggle",
+      "on-click-right": "pactl set-source-mute alsa_input.pci-0000_02_00.6.analog-stereo toggle",
+      "format-icons": {
+        "default": [" "]
+      }
+    },
+
+	  "custom/control":{
+        "format": " ",
+        "on-click": "blueman-manager",
+        "tooltip": false
     }
-  },
-
-  "custom/empty": { "format": "" },
-
-  "custom/appmenu": {
-    "format": "Apps",
-    "on-click": "shutdown now",
-    "tooltip": false
-  },
-
-  "custom/appmenuicon": {
-    "format": "",
-    "on-click": "shutdown now",
-    "tooltip": false
-  },
-
-  "hyprland/window": {
-    "format": "[{}]",
-    "max-length": 60
-  },
-
-  "tray": {
-    "icon-size": 17,
-    "spacing": 10
-  },
-
-  "pulseaudio": {
-    "format": " {volume}%",
-    "format-bluetooth": " {volume}%",
-    "format-source": "",
-    "format-source-muted": " ",
-    "format-muted": "  {format_source} ",
-    "on-click-middle": "pavucontrol",
-    "on-click": "pactl set-sink-mute alsa_output.pci-0000_02_00.6.analog-stereo toggle",
-    "on-click-right": "pactl set-source-mute alsa_input.pci-0000_02_00.6.analog-stereo toggle",
-    "format-icons": {
-      "default": [" "]
-    }
-  },
-
-  "network": {
-    "format-wifi": "",
-    "format-ethernet": "󰈀",
-    "format-disconnected": "󰤮",
-    "on-click": "kitty -e nmtui",
-    "tooltip": true
-  },
-
-  "custom/space-right": {
-    "format": "  ",
-    "tooltip": false
-  },
-
-  "battery": {
-    "format": "  {capacity}%",
-    "tooltip": true
-  },
-
-  "custom/cpuhistory": {
-    "exec": "~/.config/waybar/scripts/cpu_history.py -d 60",
-    "format": "<span color='#FFFFFF'> </span>{}",
-    "interval": 1,
-    "return-type": "json",
-    "on-click": "~/.config/waybar/scripts/cpu_history.py toggle",
-    "max-length": 20
-  },
-
-  "bluetooth": {
-    "format": "  ",
-    "on-click": "blueman-manager",
-    "tooltip": true
-  }
 }
