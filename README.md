@@ -39,6 +39,9 @@ This dotfiles repository includes configurations for:
 - cargo
 - swww
 - grim
+- slurp
+- brightnessctl
+- wireplumber
 - pywal
 - a nerd font
 
