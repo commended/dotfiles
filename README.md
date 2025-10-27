@@ -4,10 +4,10 @@ My Wayland/Hyprland dotfiles – A complete rice configuration for a beautiful L
 
 > **showcase**
 
-![](https://github.com/commended/ricing/blob/main/misc/showcase/layoutshowcase.png)
-![](https://github.com/commended/ricing/blob/main/misc/showcase/nvimshowcase.png)
-![](https://github.com/commended/ricing/blob/main/misc/showcase/wallshowcase.png)
-![](https://github.com/commended/ricing/blob/main/misc/showcase/browsershowcase.png)
+![](https://github.com/commended/ricing/blob/main/misc/showcase/windows.png)
+![](https://github.com/commended/ricing/blob/main/misc/showcase/nvim.png)
+![](https://github.com/commended/ricing/blob/main/misc/showcase/walls.png)
+![](https://github.com/commended/ricing/blob/main/misc/showcase/browser.png)
 
 ## What's Included
 
