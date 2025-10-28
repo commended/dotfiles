@@ -1,0 +1,83 @@
+{
+  "logo": {
+    "type": "kitty",
+    "source": "<enter path to icon>",
+    "height": 14,
+    "padding": {
+      "right": 2,
+      "up": 4
+    }
+  },
+  "display": {
+    "separator": "",
+    "constants": [
+      "────────────────────────────────────"
+    ],
+    "key": {
+      "paddingLeft": 2,
+      "width": 8
+    }
+  },
+  "modules": [
+    "break",
+    {
+      "type": "title",
+      "format": "               {user-name-colored}{at-symbol-colored}{host-name-colored}"
+    },
+    {
+      "type": "custom",
+      "format": "┌{$1}┐"
+    },
+    {
+      "key": "os",
+      "type": "os"
+    },
+    {
+      "key": "hst",
+      "type": "host"
+    },
+    {
+      "key": "krn",
+      "type": "kernel"
+    },
+    {
+      "key": "up",
+      "type": "uptime"
+    },
+    {
+      "key": "wm",
+      "type": "wm"
+    },
+    {
+      "key": "sh",
+      "type": "shell"
+    },
+    {
+      "key": "ter",
+      "type": "terminal"
+    },
+    {
+      "key": "cpu",
+      "format": "{name}",
+      "type": "cpu"
+    },
+    {
+      "key": "gpu",
+      "format": "{name}",
+      "type": "gpu"
+    },
+    {
+      "key": "mem",
+      "type": "memory"
+    },
+    {
+      "type": "custom",
+      "format": "└{$1}┘"
+    },
+    {
+      "type": "colors",
+      "paddingLeft": 12,
+      "symbol": "circle"
+    }
+  ]
+}
