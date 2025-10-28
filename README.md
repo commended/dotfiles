@@ -1,6 +1,4 @@
-# ricing
-
-My Wayland/Hyprland dotfiles – A complete rice configuration for a beautiful Linux desktop experience.
+# my dotfiles
 
 ## showcase
 
@@ -17,7 +15,6 @@ My Wayland/Hyprland dotfiles – A complete rice configuration for a beautiful L
 
 
 ## What's Included
-This dotfiles repository includes configurations for:
 
 - **hyprland** - Main window manager configuration
 - **waybar** - Sleek status bar with custom modules
@@ -53,16 +50,14 @@ This dotfiles repository includes configurations for:
 
 ## Customization
 
-
 ### Fonts
 - Ensure a Nerd Font is installed for proper icon display
 - Update font settings in:
   - Kitty: `~/.config/kitty/kitty.conf`
   - Waybar: `~/.config/waybar/config`
-  - Hyprland: `~/.config/hypr/hyprland.conf`
 
 ### Key Bindings
-- Main keybindings are in `~/.config/hypr/hyprland.conf`
+- Main keybindings are in `~/.config/hypr/config/binds.conf`
 - Customize to your preferences
 
 ## Troubleshooting
@@ -85,13 +80,4 @@ This dotfiles repository includes configurations for:
 ## Notes
 
 - Some scripts may reference absolute paths - update these to match your system
-- The setup assumes a Wayland/Hyprland environment
-- Not all components are required - feel free to pick and choose what you need
-
-## License
-
-Feel free to use, modify, and share these dotfiles!
-
----
-
-**Enjoy your rice!**
+- Not all components are required, feel free to pick and choose what you need
