@@ -2,15 +2,14 @@
 
 My Wayland/Hyprland dotfiles – A complete rice configuration for a beautiful Linux desktop experience.
 
-> **showcase**
 
-![](https://github.com/commended/ricing/blob/main/misc/showcase/windows.png)
-![](https://github.com/commended/ricing/blob/main/misc/showcase/nvim.png)
-![](https://github.com/commended/ricing/blob/main/misc/showcase/walls.png)
-![](https://github.com/commended/ricing/blob/main/misc/showcase/browser.png)
+<div align="center"><table><tr>Showcase</tr><tr><td>
+<img src="https://github.com/commended/ricing/blob/cf00082f5498d72db5d82c6f6e15dea9497d088e/misc/showcase/floating.png"/></td><td>
+<img src="https://github.com/commended/ricing/blob/cf00082f5498d72db5d82c6f6e15dea9497d088e/misc/showcase/walls.png"/></td><td>
+<img src="https://github.com/commended/ricing/blob/cf00082f5498d72db5d82c6f6e15dea9497d088e/misc/showcase/windows.png"/></td></tr></table></div>
+
 
 ## What's Included
-
 This dotfiles repository includes configurations for:
 
 - **hyprland** - Main window manager configuration
