@@ -2,11 +2,18 @@
 
 My Wayland/Hyprland dotfiles – A complete rice configuration for a beautiful Linux desktop experience.
 
+## showcase
 
-<div align="center"><table><tr>Showcase</tr><tr><td>
-<img src="https://github.com/commended/ricing/blob/cf00082f5498d72db5d82c6f6e15dea9497d088e/misc/showcase/floating.png"/></td><td>
-<img src="https://github.com/commended/ricing/blob/cf00082f5498d72db5d82c6f6e15dea9497d088e/misc/showcase/walls.png"/></td><td>
-<img src="https://github.com/commended/ricing/blob/cf00082f5498d72db5d82c6f6e15dea9497d088e/misc/showcase/windows.png"/></td></tr></table></div>
+<table border="0">
+  <tr>
+    <td><img src="https://github.com/commended/ricing/blob/80e1d85e0db0bd43ad0079bea69799707ad1dc33/misc/showcase/floating.png" width="900"/></td>
+    <td><img src="https://github.com/commended/ricing/blob/80e1d85e0db0bd43ad0079bea69799707ad1dc33/misc/showcase/windows.png" width="900"/></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/commended/ricing/blob/80e1d85e0db0bd43ad0079bea69799707ad1dc33/misc/showcase/browser.png" width="900"/></td>
+    <td><img src="https://github.com/commended/ricing/blob/80e1d85e0db0bd43ad0079bea69799707ad1dc33/misc/showcase/walls.png" width="900"/></td>
+  </tr>
+</table>
 
 
 ## What's Included
