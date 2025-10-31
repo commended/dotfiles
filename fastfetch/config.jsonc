@@ -1,83 +1,87 @@
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     "logo": {
-        "type": "builtin",
+        "type": "small",
+        "source": "arch",
         "padding": {
-            "top": 1
+            "top": 1,
+            "right": 2
         }
     },
     "display": {
-        "separator": " "
+        "separator": ">  ",
+        "color": {
+            "separator": "red"
+        },
+        "constants": [
+            "───────────────────────────────────────────────────────────────────────────",
+            "│\u001b[75C│\u001b[75D"
+        ]
     },
     "modules": [
         {
-            "key": "╭───────────╮",
-            "type": "custom"
+            "format": "{#1}{#keys}╭{$1}╮\u001b[76D {user-name-colored}{at-symbol-colored}{host-name-colored} ",
+            "type": "title"
         },
         {
-            "key": "│ {#31} user    {#keys}│",
-            "type": "title",
-            "format": "{user-name}"
-        },
-        {
-            "key": "│ {#31}󰇅 hname   {#keys}│",
-            "type": "title",
-            "format": "{host-name}"
-        },
-        {
-            "key": "│ {#31}󰅐 uptime  {#keys}│",
-            "type": "uptime"
-        },
-        {
-            "key": "│ {#31}{icon} distro  {#keys}│",
-            "type": "os"
-        },
-        {
-            "key": "│ {#31} kernel  {#keys}│",
+            "key": "{$2}{#31} kernel   ",
             "type": "kernel"
         },
         {
-            "key": "│ {#31}󰇄 desktop {#keys}│",
+            "key": "{$2}{#32}󰅐 uptime   ",
+            "type": "uptime"
+        },
+        {
+            "key": "{$2}{#33}{icon} distro   ",
+            "type": "os"
+        },
+        {
+            "key": "{$2}{#34}󰇄 desktop  ",
             "type": "de"
         },
         {
-            "key": "│ {#31} term    {#keys}│",
+            "key": "{$2}{#35} term     ",
             "type": "terminal"
         },
         {
-            "key": "│ {#31} shell   {#keys}│",
+            "key": "{$2}{#36} shell    ",
             "type": "shell"
         },
         {
-            "key": "│ {#31}󰍛 cpu     {#keys}│",
+            "key": "{$2}{#35}󰍛 cpu      ",
             "type": "cpu",
-            "showPeCoreCount": true
+            "showPeCoreCount": true,
+            "temp": true
         },
         {
-            "key": "│ {#31}󰉉 disk    {#keys}│",
+            "key": "{$2}{#34}󰍛 gpu      ",
+            "type": "gpu"
+        },
+        {
+            "key": "{$2}{#33}󰉉 disk     ",
             "type": "disk",
             "folders": "/"
         },
         {
-            "key": "│ {#31} memory  {#keys}│",
+            "key": "{$2}{#32} memory   ",
             "type": "memory"
         },
         {
-            "key": "├───────────┤",
-            "type": "custom"
-        },
-        {
-            "key": "│ {#39}󱐋charge  {#keys} │",
+            "key": "{$2}{#31} charge  ",
             "type": "battery",
             "format": "{4} {5}"
         },
         {
-            "key": "│ {#39} colors  {#keys}│",
+            "format": "{#1}{#keys}├{$1}┤",
+            "type": "custom"
+        },
+        {
+            "key": "{$2}{#39} colors   ",
             "type": "colors",
             "symbol": "circle"
         },
         {
-            "key": "╰───────────╯",
+            "format": "{#1}{#keys}╰{$1}╯",
             "type": "custom"
         }
     ]
