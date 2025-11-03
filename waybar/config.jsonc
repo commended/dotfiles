@@ -9,8 +9,7 @@
     "margin-left": 10,
 
     "modules-left": [
-        "custom/launcher",
-        "hyprland/workspaces"
+        "hyprland/workspaces",
     ],
 
     "modules-center": [
@@ -21,22 +20,16 @@
         "tray",
         "battery",
         "network",
-        "pulseaudio",
+        "wireplumber",
 		    "custom/control"
     ],
-
-    "custom/launcher":{
-        "format": " ",
-        "on-click": "~/.local/bin/wallpaper-selector",
-        "tooltip": false
-    },
 
     "hyprland/workspaces": {
         "disable-scroll": true,
         "all-outputs": true,
         "tooltip": false,
         "persistent-workspaces": {
-          "1": [],"2": [],"3": [], "4": [], "5": [] 
+          "1": [ ],"2": [ ],"3": [ ] 
         }
     },
 
@@ -47,6 +40,7 @@
 
     "battery": {
       "format": "   {capacity}%",
+      "format-charging": "   {capacity}%",
       "tooltip": true
     },
 
@@ -62,23 +56,12 @@
       "tooltip": true
     },
 
-    "pulseaudio": {
-      "format": "  {volume}%",
-      "format-bluetooth": "   {volume}%",
-      "format-source": "",
-      "format-source-muted": " ",
-      "format-muted": "  {format_source} ",
+    "wireplumber": {
+      "format": "    {volume}%",
+      "format-muted": "  ",
+      "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+      "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
       "on-click-middle": "pavucontrol",
-      "on-click": "pactl set-sink-mute alsa_output.pci-0000_02_00.6.analog-stereo toggle",
-      "on-click-right": "pactl set-source-mute alsa_input.pci-0000_02_00.6.analog-stereo toggle",
-      "format-icons": {
-        "default": [" "]
-      }
+      "tooltip": true,
+      "tooltip-format": "{node_name}"
     },
-
-	  "custom/control":{
-        "format": " ",
-        "on-click": "blueman-manager",
-        "tooltip": false
-    }
-}
