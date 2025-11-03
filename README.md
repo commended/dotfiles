@@ -4,8 +4,8 @@
 
 <table border="0">
   <tr>
-    <td><img src="https://github.com/commended/ricing/blob/80e1d85e0db0bd43ad0079bea69799707ad1dc33/misc/showcase/floating.png" width="900"/></td>
-    <td><img src="https://github.com/commended/ricing/blob/80e1d85e0db0bd43ad0079bea69799707ad1dc33/misc/showcase/windows.png" width="900"/></td>
+    <td><img src="https://github.com/commended/dotfiles/blob/d3419ba70a39ff1f16d6a0c0374ebfb6ef39d118/misc/showcase/screenshot_2025-11-02_17-57-39.png" width="900"/></td>
+    <td><img src="https://github.com/commended/dotfiles/blob/d3419ba70a39ff1f16d6a0c0374ebfb6ef39d118/misc/showcase/screenshot_2025-11-02_17-59-06.png" width="900"/></td>
   </tr>
   <tr>
     <td><img src="https://github.com/commended/ricing/blob/80e1d85e0db0bd43ad0079bea69799707ad1dc33/misc/showcase/browser.png" width="900"/></td>
