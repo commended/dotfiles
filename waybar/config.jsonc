@@ -20,8 +20,7 @@
         "tray",
         "battery",
         "network",
-        "wireplumber",
-		    "custom/control"
+        "wireplumber"
     ],
 
     "hyprland/workspaces": {
@@ -59,9 +58,8 @@
     "wireplumber": {
       "format": "    {volume}%",
       "format-muted": "  ",
-      "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-      "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
-      "on-click-middle": "pavucontrol",
+      "on-click": "blueman-manager",
       "tooltip": true,
       "tooltip-format": "{node_name}"
-    },
+    }
+},
