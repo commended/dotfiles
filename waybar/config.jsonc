@@ -56,8 +56,8 @@
     },
 
     "wireplumber": {
-      "format": "    {volume}%",
-      "format-muted": "  ",
+      "format": "   {volume}%",
+      "format-muted": " ",
       "on-click": "blueman-manager",
       "tooltip": true,
       "tooltip-format": "{node_name}"
