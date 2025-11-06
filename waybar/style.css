@@ -78,9 +78,9 @@ tooltip label {
 #wireplumber,
 #battery,
 #tray {
-    background-color: rgba(6, 6, 6, 0.85);
+    background-color: @background;
     border: 2px solid @color3;  
-    color: @color7;  }
+    color: @color3;  }
 
 #network {
     min-width: 20px;
