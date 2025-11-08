@@ -1,31 +1,71 @@
-# my dotfiles
+# My Dotfiles
 
-## showcase
+## Showcase
+
+### Screenshots
 
 <table border="0">
   <tr>
-    <td><img src="https://github.com/commended/dotfiles/blob/d3419ba70a39ff1f16d6a0c0374ebfb6ef39d118/misc/showcase/screenshot_2025-11-02_17-57-39.png" width="900"/></td>
-    <td><img src="https://github.com/commended/dotfiles/blob/d3419ba70a39ff1f16d6a0c0374ebfb6ef39d118/misc/showcase/screenshot_2025-11-02_17-59-06.png" width="900"/></td>
+    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/floating.png" width="900"/></td>
+    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/whitenvim.png" width="900"/></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/commended/ricing/blob/80e1d85e0db0bd43ad0079bea69799707ad1dc33/misc/showcase/browser.png" width="900"/></td>
-    <td><img src="https://github.com/commended/ricing/blob/80e1d85e0db0bd43ad0079bea69799707ad1dc33/misc/showcase/walls.png" width="900"/></td>
+    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/browser.png" width="900"/></td>
+    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/tiled.png" width="900"/></td>
   </tr>
 </table>
+
+### Themes
+
+<details>
+<summary>Dark</summary>
+
+![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/dark.png)
+
+</details>
+<details>
+<summary>Light</summary>
+
+![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/light.png)
+
+</details>
+<details>
+<summary>Gruvbox</summary>
+
+![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/gruvbox.png)
+
+</details>
+<details>
+<summary>Gruvbox Dark</summary>
+
+![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/gruvdark.png)
+
+</details>
+<details>
+<summary>Nord</summary>
+
+![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/nord.png)
+
+</details>
+<details>
+<summary>Sakura</summary>
+
+![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/sakura.png)
+
+</details>
+
+
 
 
 ## What's Included
 
-- **hyprland** - Main window manager configuration
-- **waybar** - Sleek status bar with custom modules
-- **kitty** - Fast GPU-accelerated terminal emulator
-- **rofi** - Wallpaper selector/application launcher/powermenu
+- **hypr** - Main window manager configuration aswell as hyprlock configuration
+- **waybar** - Statusbar
+- **kitty** - terminal
+- **rofi** - theme switcher/application launcher/powermenu
 - **fastfetch** - System information display
-- **zsh** - Enhanced shell configuration
-- **starship** - Beautiful shell prompt
-- **nvim** - LazyVim text editor setup
-- **rmpc** - MPD client configuration
-- **yazi** - Terminal file manager
+- **nvim** - plugins
+- **misc** - yazi, rmpc, zsh, starship, and kotofetch configurations aswell as my wallpapers
 
 ## Prerequisites
 
@@ -81,3 +121,4 @@
 
 - Some scripts may reference absolute paths - update these to match your system
 - Not all components are required, feel free to pick and choose what you need
+
