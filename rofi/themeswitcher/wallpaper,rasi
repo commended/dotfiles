@@ -1,0 +1,85 @@
+configuration {
+    show-icons: true;
+}
+
+mainbox {
+    children: [listview];
+    padding: 25% 0%;
+}
+
+* {
+    background-color: transparent;
+
+    background: #000000;
+    foreground: #ffffff;
+    selected-normal-background: #333333;
+    selected-urgent-background: #555555;
+    selected-normal-foreground: #ffffff;
+}
+
+window {
+    fullscreen: true;
+    background-color: transparent;
+}
+
+listview {
+    lines: 2;
+    columns: 7;
+    spacing: 0px;
+    padding: 0px 0px;
+    flow: horizontal;
+    children: [icon];
+}
+
+element {
+    orientation: horizontal;
+    spacing: 8px;
+    padding: 8px;
+    border-radius: 0px;
+    background-color: transparent;
+}
+
+element-icon {
+    size: 229px 540px;
+    margin: 0px;
+    horizontal-align: 0;
+}
+
+element-text {
+    margin: 0px;
+    padding: 4px 8px;
+    background-color: #101010;
+    text-color: #ffffff;
+    font: "JetBrains Mono Medium 9";
+}
+
+element.selected {
+    background-color: @selected-normal-background;
+    border: 2px;
+    border-color: white;
+}
+
+element.selected element-text {
+    background-color: @selected-urgent-background;
+    text-color: @selected-normal-foreground;
+    font: "JetBrains Mono Bold Italic 10";
+}
+
+inputbar {
+    children: [prompt, entry, num-filtered-rows];
+    spacing: 8px;
+    padding: 12px;
+    margin: 16px 0px 0px 0px;
+    background-color: @background-alt;
+    border-radius: 8px;
+}
+
+prompt {
+    text-color: @foreground;
+    font: "JetBrains Mono Italic 12";
+}
+
+num-filtered-rows {
+    text-color: @foreground;
+    font: "JetBrains Mono Italic 11";
+}
