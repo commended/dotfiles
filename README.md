@@ -20,37 +20,45 @@
 <details>
 <summary>Dark</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/dark.png)
+![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/dark.png)
 
 </details>
 <details>
 <summary>Light</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/light.png)
+![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/light.png)
 
 </details>
 <details>
 <summary>Gruvbox</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/gruvbox.png)
+![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/gruvbox.png)
 
 </details>
 <details>
 <summary>Gruvbox Dark</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/gruvdark.png)
+![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/gruvdark.png)
 
 </details>
 <details>
 <summary>Nord</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/nord.png)
+![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/nord.png)
 
 </details>
 <details>
 <summary>Sakura</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/themes/sakura.png)
+![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/sakura.png)
+
+</details>
+
+</details>
+<details>
+<summary>Iris</summary>
+
+![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/iris.png)
 
 </details>
 

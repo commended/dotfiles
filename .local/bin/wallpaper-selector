@@ -1,7 +1,9 @@
-WALLPAPER_DIR="<enter here>"
+# note!!! this is outdated but i do use it in my themeswitcher
+
+WALLPAPER_DIR="~/Pictures/wallpapers"
 CACHE_DIR="$HOME/.cache/wallpaper-selector"
 THUMBNAILS_DIR="$CACHE_DIR/thumbnails"
-THEME_PATH="$HOME/.config/rofi/wallpaper.rasi"
+THEME_PATH="$HOME/.config/rofi/themeswitcher/wallpaper.rasi"
 MAX_PARALLEL_JOBS=4
 
 TRANSITION_TYPE="any"  # Options: simple, fade, wipe, grow, outer, wave, center, any, random
