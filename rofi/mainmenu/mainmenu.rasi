@@ -1,8 +1,6 @@
-/*****----- Global Properties -----*****/
 @import                          "shared/colors.rasi"
 @import                          "shared/fonts.rasi"
 
-/*****----- Main Window -----*****/
 window {
     transparency:                "real";
     location:                    west;
@@ -16,14 +14,13 @@ window {
     enabled:                     true;
     margin:                      0px;
     padding:                     0px;
-    border:                      0px solid;
-    border-radius:               10px;
+    border:                      2px solid;
+    border-radius:               15px;
     border-color:                @selected;
     background-color:            @background;
     cursor:                      "default";
 }
 
-/*****----- Main Box -----*****/
 mainbox {
     enabled:                     true;
     spacing:                     20px;
@@ -36,7 +33,6 @@ mainbox {
     children:                    [ "inputbar", "listview" ];
 }
 
-/*****----- Inputbar -----*****/
 inputbar {
     enabled:                     true;
     spacing:                     10px;
@@ -71,7 +67,6 @@ entry {
     placeholder-color:           inherit;
 }
 
-/*****----- Listview -----*****/
 listview {
     enabled:                     true;
     columns:                     1;
@@ -101,7 +96,6 @@ scrollbar {
     background-color:            @background-alt;
 }
 
-/*****----- Elements -----*****/
 element {
     enabled:                     true;
     spacing:                     10px;
@@ -141,7 +135,6 @@ element-text {
     horizontal-align:            0.5;
 }
 
-/*****----- Message -----*****/
 error-message {
     padding:                     20px;
     border:                      0px solid;
