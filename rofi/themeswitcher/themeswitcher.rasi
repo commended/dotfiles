@@ -1,13 +1,11 @@
-/*****----- Configuration -----*****/
 configuration {
     show-icons:                 false;
 }
 
-/*****----- Global Properties -----*****/
 @import                          "shared/colors.rasi"
 @import                          "shared/fonts.rasi"
 
-/*****----- Main Window -----*****/
+
 window {
     transparency:                "real";
     location:                    center;
@@ -25,7 +23,6 @@ window {
     background-color:            @background;
 }
 
-/*****----- Main Box -----*****/
 mainbox {
     enabled:                     true;
     spacing:                     10px;
@@ -35,7 +32,6 @@ mainbox {
     children:                    [ "inputbar", "message", "listview" ];
 }
 
-/*****----- Inputbar -----*****/
 inputbar {
     enabled:                     true;
     spacing:                     10px;
@@ -65,7 +61,6 @@ prompt {
     text-color:                  @background;
 }
 
-/*****----- Message -----*****/
 message {
     enabled:                     true;
     margin:                      0px;
@@ -83,7 +78,6 @@ textbox {
     horizontal-align:            0.0;
 }
 
-/*****----- Listview -----*****/
 listview {
     enabled:                     true;
     columns:                     1;
@@ -97,7 +91,6 @@ listview {
     cursor:                      "default";
 }
 
-/*****----- Elements -----*****/
 element {
     enabled:                     true;
     padding:                     10px;
