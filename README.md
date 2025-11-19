@@ -6,12 +6,12 @@
 
 <table border="0">
   <tr>
-    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/floating.png" width="900"/></td>
-    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/whitenvim.png" width="900"/></td>
+    <td><img src="https://github.com/commended/dotfiles/blob/406f9e8f5559f4c6d0bfe5efc99426b5de2b9dac/misc/showcase/floatingwhiteshowcase.png" width="700"/></td>
+    <td><img src="https://github.com/commended/dotfiles/blob/406f9e8f5559f4c6d0bfe5efc99426b5de2b9dac/misc/showcase/sakurafloat.png" width="700"/></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/browser.png" width="900"/></td>
-    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/tiled.png" width="900"/></td>
+    <td><img src="https://github.com/commended/dotfiles/blob/406f9e8f5559f4c6d0bfe5efc99426b5de2b9dac/misc/showcase/walls.png" width="700"/></td>
+    <td><img src="https://github.com/commended/dotfiles/blob/406f9e8f5559f4c6d0bfe5efc99426b5de2b9dac/misc/showcase/search.png" width="700"/></td>
   </tr>
 </table>
 
@@ -62,18 +62,6 @@
 
 </details>
 
-
-
-
-## What's Included
-
-- **hypr** - Main window manager configuration aswell as hyprlock configuration
-- **waybar** - Statusbar
-- **kitty** - terminal
-- **rofi** - theme switcher/application launcher/powermenu
-- **fastfetch** - System information display
-- **nvim** - plugins
-- **misc** - yazi, rmpc, zsh, starship, and kotofetch configurations aswell as my wallpapers
 
 ## Prerequisites
 
