@@ -7,13 +7,14 @@
 # Configuration
 # ============================================================================
 
-WALLPAPER_DIR="<enter wallpaper directory here>"
-WAYBAR_COLORS="<enter>"
+WALLPAPER_DIR="$HOME/Pictures/wallpapers"
+WAYBAR_COLORS="$HOME/.config/waybar/colors.css"
 ROFI_CONFIG="$HOME/.config/rofi/themeswitcher/themeswitcher.rasi"
 ROFI_WALLPAPER_CONFIG="$HOME/.config/rofi/wallpaper.rasi"
 CACHE_DIR="$HOME/.cache/themeswitcher"
 THUMBNAIL_DIR="$CACHE_DIR/thumbnails"
 HYPRLOCK_BG="$HOME/.config/hypr/images/lockbackground.jpg"
+ROFI_WALLPAPER="$HOME/.config/rofi/wallpaper.jpg"
 
 # Create cache directories if they don't exist
 mkdir -p "$THUMBNAIL_DIR"
@@ -23,32 +24,34 @@ mkdir -p "$CACHE_DIR" "$HOME/.config/rofi/colors" "$(dirname "$HYPRLOCK_BG")"
 
 # Helper: safe write from stdin to file (atomic)
 safe_write() {
-	# usage: safe_write /path/to/file <<'EOF' ... EOF
-	local dest="$1"
-	local tmp
-	tmp="$(mktemp "${dest##*/}.XXXXXX")" || return 1
-	cat > "$tmp"
-	mv -f "$tmp" "$dest"
-	chmod 644 "$dest" 2>/dev/null || true
+  # usage: safe_write /path/to/file <<'EOF' ... EOF
+  local dest="$1"
+  local tmp
+  tmp="$(mktemp "${dest##*/}.XXXXXX")" || return 1
+  cat >"$tmp"
+  mv -f "$tmp" "$dest"
+  chmod 644 "$dest" 2>/dev/null || true
 }
 
 # set wallpaper and update hyprlock background (single place)
 set_wallpaper() {
-	local wallpaper="$1"
-	# try swww, fall back to feh if needed
-	if command -v swww >/dev/null 2>&1; then
-		swww img "$wallpaper" --transition-type grow --transition-duration 1 --transition-fps 60 || true
-	else
-		command -v feh >/dev/null 2>&1 && feh --bg-scale "$wallpaper" || true
-	fi
-	# copy for hyprlock, ignore errors (mkdir done above)
-	cp -f "$wallpaper" "$HYPRLOCK_BG" 2>/dev/null || true
+  local wallpaper="$1"
+  # try swww, fall back to feh if needed
+  if command -v swww >/dev/null 2>&1; then
+    swww img "$wallpaper" --transition-type grow --transition-duration 1 --transition-fps 60 || true
+  else
+    command -v feh >/dev/null 2>&1 && feh --bg-scale "$wallpaper" || true
+  fi
+  # copy for hyprlock, ignore errors (mkdir done above)
+  cp -f "$wallpaper" "$HYPRLOCK_BG" 2>/dev/null || true
+  # copy for rofi wallpaper
+  cp -f "$wallpaper" "$ROFI_WALLPAPER" 2>/dev/null || true
 }
 
 # write pywal JSON for wal
 gen_pywal_json() {
-	local -n t=$1
-	safe_write "/tmp/theme_colors.json" <<EOF
+  local -n t=$1
+  safe_write "/tmp/theme_colors.json" <<EOF
 {
   "special": {
     "background": "${t[pywal_bg]}",
@@ -79,8 +82,8 @@ EOF
 
 # write Waybar CSS
 gen_waybar() {
-	local -n t=$1
-	safe_write "$WAYBAR_COLORS" <<EOF
+  local -n t=$1
+  safe_write "$WAYBAR_COLORS" <<EOF
 /* ${t[name]} Theme Active */
 @define-color background ${t[waybar_bg]};
 @define-color foreground ${t[waybar_fg]};
@@ -94,8 +97,8 @@ EOF
 
 # write Rofi colors (updating.rasi)
 gen_rofi() {
-	local -n t=$1
-	safe_write "$HOME/.config/rofi/colors/updating.rasi" <<EOF
+  local -n t=$1
+  safe_write "$HOME/.config/rofi/colors/updating.rasi" <<EOF
 * {
     background:     ${t[rofi_bg]};
     background-alt: ${t[rofi_bg_alt]};
@@ -148,23 +151,23 @@ declare -A THEME_LIGHT=(
   [pywal_fg]="#000000"
   [pywal_cursor]="#000000"
   [pywal_light]="-l"
-  [color0]="#000000" [color1]="#000000" [color2]="#000000" [color3]="#000000"
-  [color4]="#000000" [color5]="#000000" [color6]="#000000" [color7]="#ffffff"
-  [color8]="#000000" [color9]="#000000" [color10]="#000000" [color11]="#000000"
-  [color12]="#000000" [color13]="#000000" [color14]="#000000" [color15]="#000000"
+  [color0]="#000000" [color1]="#1a1a1a" [color2]="#2a2a2a" [color3]="#3a3a3a"
+  [color4]="#4a4a4a" [color5]="#5a5a5a" [color6]="#6a6a6a" [color7]="#ffffff"
+  [color8]="#0a0a0a" [color9]="#1a1a1a" [color10]="#2a2a2a" [color11]="#3a3a3a"
+  [color12]="#4a4a4a" [color13]="#5a5a5a" [color14]="#6a6a6a" [color15]="#000000"
   [waybar_bg]="#ffffff"
   [waybar_fg]="#000000"
-  [waybar_surface0]="#ffffff"
-  [waybar_surface1]="#ffffff"
-  [waybar_surface2]="#ffffff"
-  [waybar_accent]="#000000"
+  [waybar_surface0]="#f5f5f5"
+  [waybar_surface1]="#e8e8e8"
+  [waybar_surface2]="#d0d0d0"
+  [waybar_accent]="#2a2a2a"
   [waybar_border]="#000000"
   [rofi_bg]="#ffffffff"
-  [rofi_bg_alt]="#ffffffff"
+  [rofi_bg_alt]="#f5f5f5ff"
   [rofi_fg]="#000000ff"
-  [rofi_selected]="#000000ff"
-  [rofi_active]="#ffffffff"
-  [rofi_urgent]="#000000ff"
+  [rofi_selected]="#2a2a2aff"
+  [rofi_active]="#e8e8e8ff"
+  [rofi_urgent]="#d0d0d0ff"
   [rofi_border]="#000000ff"
 )
 
@@ -284,28 +287,56 @@ declare -A THEME_IRIS=(
   [name]="Iris"
   [wallpaper_dir]="$WALLPAPER_DIR/iris"
   [theme_id]="iris"
-  [pywal_bg]="#0a0812"
-  [pywal_fg]="#e0d4ff"
-  [pywal_cursor]="#c7b3ff"
+  [pywal_bg]="#0f1c2e"
+  [pywal_fg]="#e0f2ff"
+  [pywal_cursor]="#7dd3fc"
   [pywal_light]=""
-  [color0]="#0a0812" [color1]="#a78bfa" [color2]="#b49aff" [color3]="#c4b5fd"
-  [color4]="#9d6fff" [color5]="#8b5cf6" [color6]="#a78bfa" [color7]="#e0d4ff"
-  [color8]="#1a1528" [color9]="#b49aff" [color10]="#c7b3ff" [color11]="#ede9fe"
-  [color12]="#ddd6fe" [color13]="#c4b5fd" [color14]="#e4dbff" [color15]="#f5f3ff"
-  [waybar_bg]="#0a0812"
-  [waybar_fg]="#e0d4ff"
-  [waybar_surface0]="#131020"
-  [waybar_surface1]="#1a1528"
-  [waybar_surface2]="#231d35"
-  [waybar_accent]="#c7b3ff"
-  [waybar_border]="#a78bfa"
-  [rofi_bg]="#0a0812ff"
-  [rofi_bg_alt]="#131020ff"
-  [rofi_fg]="#e0d4ffff"
-  [rofi_selected]="#c7b3ffff"
-  [rofi_active]="#1a1528ff"
-  [rofi_urgent]="#231d35ff"
-  [rofi_border]="#a78bfaff"
+  [color0]="#0f1c2e" [color1]="#5dbbf5" [color2]="#7dd3fc" [color3]="#bae6fd"
+  [color4]="#0ea5e9" [color5]="#0284c7" [color6]="#14b8a6" [color7]="#e0f2ff"
+  [color8]="#1e293b" [color9]="#22d3ee" [color10]="#5eead4" [color11]="#f0fdfa"
+  [color12]="#a5f3fc" [color13]="#67e8f9" [color14]="#ccfbf1" [color15]="#ffffff"
+  [waybar_bg]="#0f1c2e"
+  [waybar_fg]="#e0f2ff"
+  [waybar_surface0]="#0f172a"
+  [waybar_surface1]="#1e293b"
+  [waybar_surface2]="#334155"
+  [waybar_accent]="#7dd3fc"
+  [waybar_border]="#38bdf8"
+  [rofi_bg]="#0f1c2eff"
+  [rofi_bg_alt]="#0f172aff"
+  [rofi_fg]="#e0f2ffff"
+  [rofi_selected]="#7dd3fcff"
+  [rofi_active]="#1e293bff"
+  [rofi_urgent]="#334155ff"
+  [rofi_border]="#38bdf8ff"
+)
+
+declare -A THEME_CREME=(
+  [name]="Creme"
+  [wallpaper_dir]="$WALLPAPER_DIR/creme"
+  [theme_id]="creme"
+  [pywal_bg]="#c8c4c0"
+  [pywal_fg]="#3a3a3a"
+  [pywal_cursor]="#7a7775"
+  [pywal_light]="-l"
+  [color0]="#3a3a3a" [color1]="#4d4a48" [color2]="#605d5b" [color3]="#73706e"
+  [color4]="#868381" [color5]="#999694" [color6]="#aca9a7" [color7]="#c8c4c0"
+  [color8]="#403d3b" [color9]="#605d5b" [color10]="#73706e" [color11]="#868381"
+  [color12]="#999694" [color13]="#aca9a7" [color14]="#bfbcba" [color15]="#3a3a3a"
+  [waybar_bg]="#b5b1ad"
+  [waybar_fg]="#3a3a3a"
+  [waybar_surface0]="#b0aca8"
+  [waybar_surface1]="#aaa6a2"
+  [waybar_surface2]="#a5a19d"
+  [waybar_accent]="#73706e"
+  [waybar_border]="#868381"
+  [rofi_bg]="#c8c4c0ff"
+  [rofi_bg_alt]="#c2bebb"
+  [rofi_fg]="#3a3a3aff"
+  [rofi_selected]="#73706eff"
+  [rofi_active]="#bfbcbaff"
+  [rofi_urgent]="#b5b1adff"
+  [rofi_border]="#868381ff"
 )
 
 # ============================================================================
@@ -321,35 +352,35 @@ generate_thumbnail() {
 
 # Function to just change wallpaper without reloading theme
 change_wallpaper_only() {
-	local wallpaper="$1"
-	set_wallpaper "$wallpaper"
-	notify-send "Theme Switcher" "Wallpaper updated!"
+  local wallpaper="$1"
+  set_wallpaper "$wallpaper"
+  notify-send "Theme Switcher" "Wallpaper updated!"
 }
 
 # Generic function to apply any theme
 apply_theme() {
-	local -n theme=$1
-	local wallpaper="$2"
+  local -n theme=$1
+  local wallpaper="$2"
 
-	# set wallpaper + hypr background
-	set_wallpaper "$wallpaper"
+  # set wallpaper + hypr background
+  set_wallpaper "$wallpaper"
 
-	# generate pywal json and apply
-	gen_pywal_json theme
-	if command -v wal >/dev/null 2>&1; then
-		wal --theme /tmp/theme_colors.json -n ${theme[pywal_light]}
-	fi
+  # generate pywal json and apply
+  gen_pywal_json theme
+  if command -v wal >/dev/null 2>&1; then
+    wal --theme /tmp/theme_colors.json -n ${theme[pywal_light]}
+  fi
 
-	# generate configs
-	gen_waybar theme
-	gen_rofi theme
+  # generate configs
+  gen_waybar theme
+  gen_rofi theme
 
-	# reload waybar
-	pkill -SIGUSR2 waybar 2>/dev/null || true
+  # reload waybar
+  pkill -SIGUSR2 waybar 2>/dev/null || true
 
-	# notify after everything applied
-	notify-send "Theme Switcher" "Theme set: ${theme[name]}"
-	printf '%s\n' "${theme[name]} theme applied with wallpaper: $(basename "$wallpaper")"
+  # notify after everything applied
+  notify-send "Theme Switcher" "Theme set: ${theme[name]}"
+  printf '%s\n' "${theme[name]} theme applied with wallpaper: $(basename "$wallpaper")"
 }
 
 # Wrapper functions for compatibility
@@ -381,6 +412,10 @@ apply_iris_theme() {
   apply_theme THEME_IRIS "$1"
 }
 
+apply_creme_theme() {
+  apply_theme THEME_CREME "$1"
+}
+
 # ============================================================================
 # Wallpaper Selection Functions
 # ============================================================================
@@ -390,6 +425,7 @@ select_wallpaper() {
   local -n theme=$1
   local -A wallpaper_map
   local entries=""
+  local count=0
 
   # Check if wallpaper directory exists
   if [[ ! -d "${theme[wallpaper_dir]}" ]]; then
@@ -405,6 +441,7 @@ select_wallpaper() {
     [[ -f "$thumbnail" ]] && {
       wallpaper_map["$name"]="$image"
       entries+="${name}\0icon\x1f${thumbnail}\n"
+      ((count++))
     }
   done < <(find "${theme[wallpaper_dir]}" -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) -print0 | sort -z)
 
@@ -414,7 +451,11 @@ select_wallpaper() {
     return 1
   fi
 
-  selected=$(printf "$entries" | rofi -dmenu -i -p "${theme[name]}" -show-icons -theme "$ROFI_WALLPAPER_CONFIG" 2>/dev/null)
+  # Calculate columns based on count (max 7 per row)
+  local columns=7
+  [[ $count -le 7 ]] && columns=$count
+
+  selected=$(printf "$entries" | rofi -dmenu -i -p "${theme[name]}" -show-icons -columns "$columns" -theme "$ROFI_WALLPAPER_CONFIG" 2>/dev/null)
 
   if [[ -n "$selected" ]] && [[ -n "${wallpaper_map[$selected]}" ]]; then
     if [[ -f "$CACHE_DIR/current_theme" ]] && [[ "$(cat "$CACHE_DIR/current_theme")" == "${theme[theme_id]}" ]]; then
@@ -455,6 +496,10 @@ select_iris_wallpaper() {
   select_wallpaper THEME_IRIS
 }
 
+select_creme_wallpaper() {
+  select_wallpaper THEME_CREME
+}
+
 # ============================================================================
 # Menu Functions
 # ============================================================================
@@ -471,7 +516,7 @@ gruvbox_menu() {
 
 # Main menu
 main_menu() {
-  selected=$(echo -e "Dark\nLight\nGruvbox\nNord\nSakura\nIris" | rofi -dmenu -i -p "Theme" -theme "$ROFI_CONFIG")
+  selected=$(echo -e "Dark\nLight\nGruvbox\nNord\nSakura\nIris\nCreme" | rofi -dmenu -i -p "Theme" -theme "$ROFI_CONFIG")
 
   case "$selected" in
   "Dark") select_dark_wallpaper ;;
@@ -480,6 +525,7 @@ main_menu() {
   "Nord") select_nord_wallpaper ;;
   "Sakura") select_sakura_wallpaper ;;
   "Iris") select_iris_wallpaper ;;
+  "Creme") select_creme_wallpaper ;;
   esac
 }
 

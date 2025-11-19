@@ -6,12 +6,12 @@
 
 <table border="0">
   <tr>
-    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/floating.png" width="900"/></td>
-    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/whitenvim.png" width="900"/></td>
+    <td><img src="misc/showcase/floatingwhiteshowcase.png" width="700"/></td>
+    <td><img src="misc/showcase/sakurafloat.png" width="700"/></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/browser.png" width="900"/></td>
-    <td><img src="https://github.com/commended/dotfiles/blob/c73d4465062fb28ad8d34a846d6267eb0609096b/misc/showcase/tiled.png" width="900"/></td>
+    <td><img src="misc/showcase/walls.png" width="700"/></td>
+    <td><img src="misc/showcase/search.png" width="700"/></td>
   </tr>
 </table>
 
@@ -20,37 +20,37 @@
 <details>
 <summary>Dark</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/dark.png)
+![Alt text](misc/showcase/themes/dark.png)
 
 </details>
 <details>
 <summary>Light</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/light.png)
+![Alt text](misc/showcase/themes/light.png)
 
 </details>
 <details>
 <summary>Gruvbox</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/gruvbox.png)
+![Alt text](misc/showcase/themes/gruvbox.png)
 
 </details>
 <details>
 <summary>Gruvbox Dark</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/gruvdark.png)
+![Alt text](misc/showcase/themes/gruvdark.png)
 
 </details>
 <details>
 <summary>Nord</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/nord.png)
+![Alt text](misc/showcase/themes/nord.png)
 
 </details>
 <details>
 <summary>Sakura</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/sakura.png)
+![Alt text](misc/showcase/themes/sakura.png)
 
 </details>
 
@@ -58,43 +58,37 @@
 <details>
 <summary>Iris</summary>
 
-![Alt text](https://github.com/commended/dotfiles/blob/bb711e9d2a926a105e41496549d374ce3a0e8c3b/misc/showcase/themes/iris.png)
+![Alt text](misc/showcase/themes/iris.png)
 
 </details>
 
 
-
-
-## What's Included
-
-- **hypr** - Main window manager configuration aswell as hyprlock configuration
-- **waybar** - Statusbar
-- **kitty** - terminal
-- **rofi** - theme switcher/application launcher/powermenu
-- **fastfetch** - System information display
-- **nvim** - plugins
-- **misc** - yazi, rmpc, zsh, starship, and kotofetch configurations aswell as my wallpapers
-
 ## Prerequisites
 
+### Required
 - hyprland
 - waybar
 - kitty
 - rofi
-- fastfetch
 - zsh
 - starship
 - nvim
-- rmpc
-- yazi
-- cargo
 - swww
+- pywal (python-pywal)
+- brightnessctl
+- wireplumber (wpctl)
 - grim
 - slurp
-- brightnessctl
-- wireplumber
-- pywal
-- a nerd font
+- ImageMagick (convert command)
+- libnotify (notify-send)
+- a Nerd Font
+
+### Optional
+- fastfetch (system info display)
+- rmpc (MPD client)
+- yazi (terminal file manager)
+- mpd (music player daemon, for rmpc)
+- cargo (Rust package manager, if building from source)
 
 ## Customization
 

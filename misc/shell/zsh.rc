@@ -25,12 +25,9 @@ alias smallfetch='clear && fastfetch --config ~/.config/fastfetch/smallfetch.jso
 alias altfetch='clear && fastfetch'
 alias clock='tty-clock -c -C 7 -s -n -t'
 alias pipes='pipes.sh -c 1 -r 0'
-alias ocean='asciiquarium'
-alias bonzai='cbonsai -l -m aug!'
 alias shell='nvim ~/.zshrc'
 alias update='sudo nixos-rebuild switch --flake /etc/nixos#hyprland'
 alias dott='~/.cargo/bin/dott-tui'
-alias gifd='~/.cargo/bin/gifd'
 alias themeswitcher='~/.local/bin/themeswitcher.sh'
 
 export MOZ_ENABLE_WAYLAND=1
@@ -39,24 +36,21 @@ export XDG_SESSION_TYPE=wayland
 
 eval "$(starship init zsh)"
 
-setopt AUTO_CD                # cd just by typing directory name
-setopt CORRECT                # spelling correction
-setopt HIST_VERIFY            # verify history expansion before executing
-setopt SHARE_HISTORY          # share history between sessions
-setopt APPEND_HISTORY         # append to history file
-setopt INC_APPEND_HISTORY     # add commands to history immediately
-setopt HIST_IGNORE_DUPS       # ignore duplicate commands
-setopt HIST_REDUCE_BLANKS     # remove superfluous blanks
-setopt NO_BEEP                # disable beep
+setopt AUTO_CD           
+setopt CORRECT                
+setopt HIST_VERIFY            
+setopt SHARE_HISTORY          
+setopt APPEND_HISTORY         
+setopt INC_APPEND_HISTORY     
+setopt HIST_IGNORE_DUPS       
+setopt HIST_REDUCE_BLANKS
+setopt NO_BEEP               
 
-# History configuration
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
 SAVEHIST=10000
 
-# Fast completion system with caching
 autoload -Uz compinit
-# Only regenerate compdump once a day for performance
 if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
     compinit
 else
