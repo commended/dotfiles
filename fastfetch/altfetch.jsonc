@@ -1,78 +1,97 @@
 {
-  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "logo": {
-    "source": "nixos",
-    "padding": {
-        "top": 1,
-        "right": 2
-    }
-  },
-  "modules": [
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "type": "kitty",
+        "source": "~/.config/fastfetch/altlogo.png",
+        "height": 15,
+        "padding": {
+          "top": 2
+      }
+    },
+    "display": {
+        "separator": "->   ",
+        "color": {
+            "separator": "1" // Bold
+        },
+        "constants": [
+            "───────────────────────────"
+        ],
+        "key": {
+            "type": "both",
+            "paddingLeft": 4
+        }
+    },
+    "modules": [
+        {
+            "type": "title",
+            "format": "                             {user-name-colored}{at-symbol-colored}{host-name-colored}"
+        },
+        "break",
+        {
+            "type": "custom",
+            "format": "┌{$1} {#1}System Information{#} {$1}┐"
+        },
+        "break",
+        {
+            "key": "OS           ",
+            "type": "os"
+        },
+        {
+            "key": "Machine      ",
+            "type": "host"
+        },
+        {
+            "key": "Kernel       ",
+            "type": "kernel"
+        },
+        {
+            "key": "Uptime       ",
+            "type": "uptime"
+        },
+        {
+            "key": "Resolution   ",
+            "type": "display",
+            "compactType": "original-with-refresh-rate"
+        },
+        {
+            "key": "WM           ",
+            "type": "wm"
+        },
+        {
+            "key": "DE           ",
+            "type": "de"
+        },
+        {
+            "key": "Shell        ",
+            "type": "shell"
+        },
+        {
+            "key": "Terminal     ",
+            "type": "terminal"
+        },
+        {
+            "key": "CPU          ",
+            "type": "cpu"
+        },
+        {
+            "key": "GPU          ",
+            "type": "gpu"
+        },
+        {
+            "key": "Memory       ",
+            "type": "memory"
+        },
 
-    "break",
-    {
-        "type": "title",
-        "format": "󱩊 : {6}{7}{8}"
-    },
-    "break",
-    "break",
-    {
-        "type": "os",
-        "key": " OS",
-        "format": "{3}"
-    },
-    { 
-        "type": "kernel",
-        "key": "├ Kernel",
-        "format": "{2}"
-    },
-    {
-        "type": "packages",
-        "key": "├󰏖 Packages"
-    },
-    {
-        "type": "terminal",
-        "key": "├ Terminal",
-        "format": "{5}"
-    },
-    {
-        "type": "wm",
-        "key": "╰ WM",
-        "format": "{2}"
-    },
-
-    "break",
-    
-    {
-        "type": "host",
-        "key": "  PC",
-        "format": "{3}"
-    },
-    {
-        "type": "cpu",
-        "key": "├ CPU",
-        "format": "{1}"
-    },
-    {
-        "type": "gpu",
-        "key": "├ GPU",
-        "format": "{1} {2} [{6}]"
-    },
-    {
-        "type": "disk",
-        "key": "├ DSK",
-        "format":  "({3})  {1} / {2}"
-    },
-    {
-        "type": "memory",
-        "key": "╰ RAM",
-        "format":  "({3})  {1} / {2}"
-    },
-    
-    "break",
-    {
-        "type": "colors",
-        "symbol": "block"
-    }   
-  ]
+        "break",
+        {
+            "type": "custom",
+            "format": "└{$1}────────────────────{$1}┘"
+        },
+        "break",
+        {
+            "type": "colors",
+            "paddingLeft": 34,
+            "symbol": "circle"
+        }
+    ]
 }
