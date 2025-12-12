@@ -1,0 +1,75 @@
+{
+    "layer": "top",
+    "exclusive": true,
+    "position": "left",
+    "height": 1500,
+    "width": 25,
+    "margin-left": 10,
+    "spacing": 1,
+  
+    "modules-left": [
+	    "custom/firefox",
+	    "custom/anki",
+      "hyprland/workspaces"
+      ],
+    "modules-center": [
+    ],
+    "modules-right": [
+	    "clock",
+      "network",
+	    "wireplumber",
+	    "battery"
+    ],
+
+    "clock": {
+        "format": "{:%I:%M}",
+        "tooltip": false
+    },
+
+    "wireplumber": {
+        "format": "",
+        "format-muted": "󰝟",
+        "on-click": "blueman-manager",
+        "tooltip": false
+    },
+    
+    "hyprland/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
+        "tooltip": false,
+        "persistent-workspaces": {
+          "1": [],"2": [],"3": [] 
+        }
+    },
+
+    "battery": {
+        "format": "{icon}",
+        "format-full": "{icon}",
+        "format-charging": "{icon}",
+        "format-plugged": "{icon}",
+	      "tooltip": true,
+        "format-icons": {
+	        "default": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+	        "charging": ["󰢟", "󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"]
+	      }
+      },
+    "network": {
+        "format-wifi": "{icon}",
+        "format-disconnected": "{icon}",
+	"tooltip": false,
+	"format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+        "on-click": "kitty -e nmtui"
+    },
+ 
+    "custom/firefox": {
+	"format": "󰹑",
+	"tooltip": false,
+	"on-click": "grim ~/Pictures/showcases/screenshot_$(date +%Y-%m-%d_%H-%M-%S).png && notify-send screenshot saved"
+    },
+
+  "custom/anki": {
+  "format": "",
+	"tooltip": false,
+	"on-click": "~/.config/rofi/mainmenu/mainmenu.sh"
+    }
+}
