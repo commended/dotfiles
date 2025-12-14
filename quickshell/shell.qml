@@ -269,6 +269,346 @@ ShellRoot {
         wifiListProc.running = true
     }
     
+    // Bluetooth Dropdown Window
+    PopupWindow {
+        id: bluetoothMenuWindow
+        visible: bluetoothMenuOpen
+        width: 280
+        height: Math.max(btDevicesList.height + 30, 150)
+        
+        parentWindow: bar
+        relativeX: bar.width - 300
+        relativeY: barExpanded ? 40 : 15
+        
+        color: "transparent"
+        
+        Canvas {
+            id: btBowlShape
+            anchors.fill: parent
+            
+            onPaint: {
+                var ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                ctx.fillStyle = "#1a1a1a"
+                
+                var radius = 20
+                
+                ctx.beginPath()
+                ctx.moveTo(0, 0)
+                ctx.lineTo(width, 0)
+                ctx.lineTo(width, height - radius)
+                ctx.arcTo(width, height, width - radius, height, radius)
+                ctx.lineTo(radius, height)
+                ctx.arcTo(0, height, 0, height - radius, radius)
+                ctx.lineTo(0, 0)
+                ctx.closePath()
+                ctx.fill()
+            }
+            
+            onWidthChanged: requestPaint()
+            onHeightChanged: requestPaint()
+        }
+        
+        Column {
+            id: btDevicesList
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: 10
+            spacing: 8
+            
+            Repeater {
+                model: bluetoothDevices
+                
+                Rectangle {
+                    width: btDevicesList.width
+                    height: 36
+                    radius: 4
+                    color: btDeviceMouseArea.containsMouse ? "#505050" : (modelData.connected ? "#404040" : "#2a2a2a")
+                    
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 5
+                        spacing: 8
+                        
+                        Text {
+                            text: modelData.name
+                            font.pixelSize: 12
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: modelData.connected ? "#4CAF50" : "#ffffff"
+                        }
+                        
+                        Text {
+                            text: modelData.connected ? "󰂱" : "󰂯"
+                            font.pixelSize: 12
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: modelData.connected ? "#4CAF50" : "#888888"
+                        }
+                    }
+                    
+                    MouseArea {
+                        id: btDeviceMouseArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (modelData.connected) {
+                                btDisconnectProc.targetMac = modelData.mac
+                                btDisconnectProc.running = true
+                            } else {
+                                btConnectProc.targetMac = modelData.mac
+                                btConnectProc.running = true
+                            }
+                        }
+                    }
+                }
+            }
+            
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "No devices found"
+                font.pixelSize: 12
+                font.family: "JetBrains Mono Nerd Font"
+                color: "#888888"
+                visible: bluetoothDevices.length === 0
+            }
+        }
+    }
+    
+    // WiFi Dropdown Window
+    PopupWindow {
+        id: wifiMenuWindow
+        visible: wifiMenuOpen
+        width: 320
+        height: 400
+        
+        parentWindow: bar
+        relativeX: bar.width - 380
+        relativeY: barExpanded ? 40 : 15
+        
+        color: "transparent"
+        
+        Canvas {
+            id: wifiBowlCanvas
+            anchors.fill: parent
+            
+            onPaint: {
+                var ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                ctx.fillStyle = "#1a1a1a"
+                
+                var radius = 20
+                
+                ctx.beginPath()
+                ctx.moveTo(0, 0)
+                ctx.lineTo(width, 0)
+                ctx.lineTo(width, height - radius)
+                ctx.arcTo(width, height, width - radius, height, radius)
+                ctx.lineTo(radius, height)
+                ctx.arcTo(0, height, 0, height - radius, radius)
+                ctx.lineTo(0, 0)
+                ctx.closePath()
+                ctx.fill()
+            }
+            
+            onWidthChanged: requestPaint()
+            onHeightChanged: requestPaint()
+        }
+        
+        Column {
+            id: wifiContent
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: 12
+            spacing: 10
+            
+            // WiFi Toggle
+            Rectangle {
+                width: parent.width
+                height: 44
+                radius: 8
+                color: "#2a2a2a"
+                
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    
+                    Text {
+                        text: "󰤨  WiFi"
+                        font.pixelSize: 16
+                        font.family: "JetBrains Mono Nerd Font"
+                        color: "#ffffff"
+                    }
+                    
+                    Item { Layout.fillWidth: true }
+                    
+                    Rectangle {
+                        width: 44
+                        height: 24
+                        radius: 12
+                        color: wifiEnabled ? "#4CAF50" : "#404040"
+                        
+                        Behavior on color {
+                            ColorAnimation { duration: 150 }
+                        }
+                        
+                        Rectangle {
+                            width: 20
+                            height: 20
+                            radius: 10
+                            color: "#ffffff"
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: wifiEnabled ? parent.width - width - 2 : 2
+                            
+                            Behavior on x {
+                                NumberAnimation { duration: 150 }
+                            }
+                        }
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                wifiToggleProc.enabling = !wifiEnabled
+                                wifiToggleProc.running = true
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Connected network
+            Rectangle {
+                width: parent.width
+                height: wifiConnected !== "" ? 30 : 0
+                radius: 4
+                color: "#404040"
+                visible: wifiConnected !== ""
+                
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 5
+                    spacing: 8
+                    
+                    Text {
+                        text: "󰤨"
+                        font.pixelSize: 14
+                        font.family: "JetBrains Mono Nerd Font"
+                        color: "#4CAF50"
+                    }
+                    
+                    Text {
+                        text: wifiConnected
+                        font.pixelSize: 12
+                        font.family: "JetBrains Mono Nerd Font"
+                        color: "#ffffff"
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+                    
+                    Text {
+                        text: "Disconnect"
+                        font.pixelSize: 10
+                        font.family: "JetBrains Mono Nerd Font"
+                        color: "#ff6b6b"
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                wifiDisconnectProc.running = true
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Separator
+            Rectangle {
+                width: parent.width
+                height: 1
+                color: "#404040"
+                visible: wifiEnabled && wifiNetworks.length > 0
+            }
+            
+            // Network list
+            ListView {
+                id: wifiListView
+                width: parent.width
+                height: 200
+                model: wifiNetworks
+                spacing: 6
+                interactive: true
+                clip: true
+                visible: wifiEnabled
+                
+                delegate: Rectangle {
+                    width: wifiListView.width
+                    height: 36
+                    radius: 6
+                    color: wifiNetMouseArea.containsMouse ? "#505050" : "#2a2a2a"
+                    visible: !modelData.connected
+                    
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 5
+                        spacing: 8
+                        
+                        Text {
+                            property string signalIcon: {
+                                if (modelData.signal >= 75) return "󰤨"
+                                if (modelData.signal >= 50) return "󰤥"
+                                if (modelData.signal >= 25) return "󰤢"
+                                return "󰤟"
+                            }
+                            text: signalIcon
+                            font.pixelSize: 14
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: "#888888"
+                        }
+                        
+                        Text {
+                            text: modelData.ssid
+                            font.pixelSize: 12
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: "#ffffff"
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+                        
+                        Text {
+                            text: modelData.security !== "" ? "󰌾" : ""
+                            font.pixelSize: 10
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: "#888888"
+                        }
+                    }
+                    
+                    MouseArea {
+                        id: wifiNetMouseArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            wifiConnectProc.targetSSID = modelData.ssid
+                            wifiConnectProc.running = true
+                        }
+                    }
+                }
+            }
+            
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: wifiEnabled ? "No networks found" : "WiFi disabled"
+                font.pixelSize: 12
+                font.family: "JetBrains Mono Nerd Font"
+                color: "#888888"
+                visible: !wifiEnabled || wifiNetworks.length === 0
+            }
+        }
+    }
+    
     PanelWindow {
         id: bar
         
@@ -278,11 +618,7 @@ ShellRoot {
             right: true
         }
         
-        height: {
-            if (wifiMenuOpen) return 440
-            if (bluetoothMenuOpen) return 200
-            return 72
-        }
+        height: 72
         
         margins {
             bottom: barExpanded ? 0 : -35
@@ -556,378 +892,6 @@ ShellRoot {
                             clock.text = Qt.formatDateTime(new Date(), "hh:mm")
                         }
                         Component.onCompleted: triggered()
-                    }
-                }
-            }
-            
-            // Bluetooth Dropdown Menu
-            Item {
-                id: bluetoothMenu
-                anchors {
-                    top: mainBar.bottom
-                    right: parent.right
-                    rightMargin: 20
-                }
-                width: 280
-                height: bluetoothMenuOpen ? Math.max(devicesList.height + 30, 150) : 0
-                clip: true
-                opacity: bluetoothMenuOpen ? 1.0 : 0.0
-                z: 200
-                
-                Behavior on height {
-                    NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-                
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-                
-                Canvas {
-                    id: bowlShape
-                    anchors.fill: parent
-                    
-                    onPaint: {
-                        var ctx = getContext("2d")
-                        ctx.clearRect(0, 0, width, height)
-                        ctx.fillStyle = "#1a1a1a"
-                        
-                        var radius = 20
-                        
-                        ctx.beginPath()
-                        ctx.moveTo(0, 0)
-                        ctx.lineTo(width, 0)
-                        ctx.lineTo(width, height - radius)
-                        ctx.arcTo(width, height, width - radius, height, radius)
-                        ctx.lineTo(radius, height)
-                        ctx.arcTo(0, height, 0, height - radius, radius)
-                        ctx.lineTo(0, 0)
-                        ctx.closePath()
-                        ctx.fill()
-                    }
-                    
-                    onWidthChanged: requestPaint()
-                    onHeightChanged: requestPaint()
-                }
-                
-                Column {
-                    id: devicesList
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    anchors.margins: 10
-                    spacing: 8
-                    
-                    Repeater {
-                        model: bluetoothDevices
-                        
-                        Rectangle {
-                            width: devicesList.width
-                            height: 36
-                            radius: 4
-                            color: deviceMouseArea.containsMouse ? "#505050" : (modelData.connected ? "#404040" : "#2a2a2a")
-                            
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: 5
-                                spacing: 8
-                                
-                                Text {
-                                    text: modelData.name
-                                    font.pixelSize: 12
-                                    font.family: "JetBrains Mono Nerd Font"
-                                    color: modelData.connected ? "#4CAF50" : "#ffffff"
-                                }
-                                
-                                Text {
-                                    text: modelData.connected ? "󰂱" : "󰂯"
-                                    font.pixelSize: 12
-                                    font.family: "JetBrains Mono Nerd Font"
-                                    color: modelData.connected ? "#4CAF50" : "#888888"
-                                }
-                            }
-                            
-                            MouseArea {
-                                id: deviceMouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    if (modelData.connected) {
-                                        // Disconnect
-                                        btDisconnectProc.targetMac = modelData.mac
-                                        btDisconnectProc.running = true
-                                    } else {
-                                        // Connect
-                                        btConnectProc.targetMac = modelData.mac
-                                        btConnectProc.running = true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    Text {
-                        anchors.centerIn: parent
-                        text: "No devices found"
-                        font.pixelSize: 12
-                        font.family: "JetBrains Mono Nerd Font"
-                        color: "#888888"
-                        visible: bluetoothDevices.length === 0
-                    }
-                }
-            }
-            
-            // WiFi Dropdown Menu
-            Item {
-                id: wifiMenu
-                anchors {
-                    top: mainBar.bottom
-                    right: parent.right
-                    rightMargin: 60
-                }
-                width: 320
-                height: wifiMenuOpen ? 400 : 0
-                clip: true
-                opacity: wifiMenuOpen ? 1.0 : 0.0
-                z: 200
-                
-                Behavior on height {
-                    NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-                
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-                
-                Canvas {
-                    id: wifiBowlShape
-                    anchors.fill: parent
-                    
-                    onPaint: {
-                        var ctx = getContext("2d")
-                        ctx.clearRect(0, 0, width, height)
-                        ctx.fillStyle = "#1a1a1a"
-                        
-                        var radius = 20
-                        
-                        ctx.beginPath()
-                        ctx.moveTo(0, 0)
-                        ctx.lineTo(width, 0)
-                        ctx.lineTo(width, height - radius)
-                        ctx.arcTo(width, height, width - radius, height, radius)
-                        ctx.lineTo(radius, height)
-                        ctx.arcTo(0, height, 0, height - radius, radius)
-                        ctx.lineTo(0, 0)
-                        ctx.closePath()
-                        ctx.fill()
-                    }
-                    
-                    onWidthChanged: requestPaint()
-                    onHeightChanged: requestPaint()
-                }
-                
-                Column {
-                    id: wifiContent
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    anchors.margins: 12
-                    spacing: 10
-                    
-                    // WiFi Toggle
-                    Rectangle {
-                        width: parent.width
-                        height: 44
-                        radius: 8
-                        color: "#2a2a2a"
-                        
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            
-                            Text {
-                                text: "󰤨  WiFi"
-                                font.pixelSize: 16
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: "#ffffff"
-                            }
-                            
-                            Item { Layout.fillWidth: true }
-                            
-                            Rectangle {
-                                width: 44
-                                height: 24
-                                radius: 12
-                                color: wifiEnabled ? "#4CAF50" : "#404040"
-                                
-                                Behavior on color {
-                                    ColorAnimation { duration: 150 }
-                                }
-                                
-                                Rectangle {
-                                    width: 20
-                                    height: 20
-                                    radius: 10
-                                    color: "#ffffff"
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    x: wifiEnabled ? parent.width - width - 2 : 2
-                                    
-                                    Behavior on x {
-                                        NumberAnimation { duration: 150 }
-                                    }
-                                }
-                                
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        wifiToggleProc.enabling = !wifiEnabled
-                                        wifiToggleProc.running = true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Connected network
-                    Rectangle {
-                        width: parent.width
-                        height: wifiConnected !== "" ? 30 : 0
-                        radius: 4
-                        color: "#404040"
-                        visible: wifiConnected !== ""
-                        
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: 5
-                            spacing: 8
-                            
-                            Text {
-                                text: "󰤨"
-                                font.pixelSize: 14
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: "#4CAF50"
-                            }
-                            
-                            Text {
-                                text: wifiConnected
-                                font.pixelSize: 12
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: "#ffffff"
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                            }
-                            
-                            Text {
-                                text: "Disconnect"
-                                font.pixelSize: 10
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: "#ff6b6b"
-                                
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        wifiDisconnectProc.running = true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Separator
-                    Rectangle {
-                        width: parent.width
-                        height: 1
-                        color: "#404040"
-                        visible: wifiEnabled && wifiNetworks.length > 0
-                    }
-                    
-                    // Network list
-                    ListView {
-                        id: wifiList
-                        width: parent.width
-                        height: 200
-                        model: wifiNetworks
-                        spacing: 6
-                        interactive: true
-                        clip: true
-                        visible: wifiEnabled
-                        
-                        delegate: Rectangle {
-                            width: wifiList.width
-                            height: 36
-                            radius: 6
-                            color: wifiNetMouseArea.containsMouse ? "#505050" : "#2a2a2a"
-                            visible: !modelData.connected
-                            
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: 5
-                                spacing: 8
-                                
-                                Text {
-                                    property string signalIcon: {
-                                        if (modelData.signal >= 75) return "󰤨"
-                                        if (modelData.signal >= 50) return "󰤥"
-                                        if (modelData.signal >= 25) return "󰤢"
-                                        return "󰤟"
-                                    }
-                                    text: signalIcon
-                                    font.pixelSize: 14
-                                    font.family: "JetBrains Mono Nerd Font"
-                                    color: "#888888"
-                                }
-                                
-                                Text {
-                                    text: modelData.ssid
-                                    font.pixelSize: 12
-                                    font.family: "JetBrains Mono Nerd Font"
-                                    color: "#ffffff"
-                                    elide: Text.ElideRight
-                                    Layout.fillWidth: true
-                                }
-                                
-                                Text {
-                                    text: modelData.security !== "" ? "󰌾" : ""
-                                    font.pixelSize: 10
-                                    font.family: "JetBrains Mono Nerd Font"
-                                    color: "#888888"
-                                }
-                            }
-                            
-                            MouseArea {
-                                id: wifiNetMouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    wifiConnectProc.targetSSID = modelData.ssid
-                                    wifiConnectProc.running = true
-                                }
-                            }
-                        }
-                    }
-                    
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: wifiEnabled ? "No networks found" : "WiFi disabled"
-                        font.pixelSize: 12
-                        font.family: "JetBrains Mono Nerd Font"
-                        color: "#888888"
-                        visible: !wifiEnabled || wifiNetworks.length === 0
                     }
                 }
             }
