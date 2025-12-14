@@ -282,9 +282,29 @@ ShellRoot {
         
         color: "transparent"
         
-        Canvas {
-            id: btBowlShape
+        Item {
             anchors.fill: parent
+            scale: bluetoothMenuOpen ? 1.0 : 0.0
+            opacity: bluetoothMenuOpen ? 1.0 : 0.0
+            transformOrigin: Item.Top
+            
+            Behavior on scale {
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.OutCubic
+                }
+            }
+            
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: Easing.OutCubic
+                }
+            }
+        
+            Canvas {
+                id: btBowlShape
+                anchors.fill: parent
             
             onPaint: {
                 var ctx = getContext("2d")
@@ -373,6 +393,7 @@ ShellRoot {
                 visible: bluetoothDevices.length === 0
             }
         }
+        }
     }
     
     // WiFi Dropdown Window
@@ -388,9 +409,29 @@ ShellRoot {
         
         color: "transparent"
         
-        Canvas {
-            id: wifiBowlCanvas
+        Item {
             anchors.fill: parent
+            scale: wifiMenuOpen ? 1.0 : 0.0
+            opacity: wifiMenuOpen ? 1.0 : 0.0
+            transformOrigin: Item.Top
+            
+            Behavior on scale {
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.OutCubic
+                }
+            }
+            
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: Easing.OutCubic
+                }
+            }
+        
+            Canvas {
+                id: wifiBowlCanvas
+                anchors.fill: parent
             
             onPaint: {
                 var ctx = getContext("2d")
@@ -606,6 +647,7 @@ ShellRoot {
                 color: "#888888"
                 visible: !wifiEnabled || wifiNetworks.length === 0
             }
+        }
         }
     }
     
