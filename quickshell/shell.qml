@@ -17,6 +17,11 @@ ShellRoot {
     property bool wifiEnabled: true
     property string wifiConnected: ""
     property var wifiNetworks: []
+    property bool calendarMenuOpen: false
+    property date currentDate: new Date()
+    property bool volumeMenuOpen: false
+    property int targetVolumeLevel: volumeLevel
+    property bool isDraggingVolume: false
     
     Process {
         id: volProc
@@ -26,7 +31,11 @@ ShellRoot {
                 if (!data) return
                 var match = data.match(/Volume:\s*([\d.]+)/)
                 if (match) {
-                    volumeLevel = Math.round(parseFloat(match[1]) * 100)
+                    var newLevel = Math.round(parseFloat(match[1]) * 100)
+                    if (!isDraggingVolume) {
+                        volumeLevel = newLevel
+                        targetVolumeLevel = newLevel
+                    }
                 }
                 volumeMuted = data.includes("[MUTED]")
             }
@@ -39,7 +48,9 @@ ShellRoot {
         command: ["sh", "-c", "pactl subscribe | grep --line-buffered 'sink'"]
         stdout: SplitParser {
             onRead: data => {
-                volProc.running = true
+                if (!isDraggingVolume) {
+                    volProc.running = true
+                }
             }
         }
         Component.onCompleted: running = true
@@ -49,7 +60,11 @@ ShellRoot {
         interval: 1000
         running: true
         repeat: true
-        onTriggered: volProc.running = true
+        onTriggered: {
+            if (!isDraggingVolume) {
+                volProc.running = true
+            }
+        }
     }
     
     Process {
@@ -269,10 +284,213 @@ ShellRoot {
         wifiListProc.running = true
     }
     
+    Process {
+        id: volSetProc
+        command: ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "0"]
+        
+        function setVolume(level) {
+            command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", (level / 100).toFixed(2)]
+            running = true
+        }
+    }
+    
+    // Volume Dropdown Window
+    PopupWindow {
+        id: volumeMenuWindow
+        visible: volumeMenuOpen || volCloseAnim.running
+        width: 280
+        height: 120
+        
+        parentWindow: bar
+        relativeX: bar.width - width - 1
+        relativeY: barExpanded ? 40 : 15
+        
+        color: "transparent"
+        
+        Item {
+            anchors.fill: parent
+            scale: volumeMenuOpen ? 1.0 : 0.0
+            opacity: volumeMenuOpen ? 1.0 : 0.0
+            transformOrigin: Item.Top
+            
+            Behavior on scale {
+                NumberAnimation {
+                    id: volCloseAnim
+                    duration: 200
+                    easing.type: volumeMenuOpen ? Easing.OutCubic : Easing.InCubic
+                }
+            }
+            
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: volumeMenuOpen ? Easing.OutCubic : Easing.InCubic
+                }
+            }
+        
+            Canvas {
+                id: volBowlCanvas
+                anchors.fill: parent
+            
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.clearRect(0, 0, width, height)
+                    ctx.fillStyle = "#1a1a1a"
+                    
+                    var radius = 20
+                    
+                    ctx.beginPath()
+                    ctx.moveTo(0, 0)
+                    ctx.lineTo(width, 0)
+                    ctx.lineTo(width, height - radius)
+                    ctx.arcTo(width, height, width - radius, height, radius)
+                    ctx.lineTo(radius, height)
+                    ctx.arcTo(0, height, 0, height - radius, radius)
+                    ctx.lineTo(0, 0)
+                    ctx.closePath()
+                    ctx.fill()
+                }
+                
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+            }
+            
+            Column {
+                anchors.fill: parent
+                anchors.margins: 15
+                spacing: 12
+                
+                // Volume Header
+                Rectangle {
+                    width: parent.width
+                    height: 36
+                    radius: 8
+                    color: "#2a2a2a"
+                    
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        spacing: 10
+                        
+                        Text {
+                            property string volIcon: {
+                                if (volumeMuted) return "󰝟"
+                                if (volumeLevel >= 66) return "󰕾"
+                                if (volumeLevel >= 33) return "󰖀"
+                                if (volumeLevel > 0) return "󰕿"
+                                return "󰝟"
+                            }
+                            text: volIcon
+                            font.pixelSize: 18
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: volumeMuted ? "#888888" : "#ffffff"
+                        }
+                        
+                        Text {
+                            text: "Volume"
+                            font.pixelSize: 14
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: "#ffffff"
+                        }
+                        
+                        Item { Layout.fillWidth: true }
+                        
+                        Text {
+                            text: targetVolumeLevel + "%"
+                            font.pixelSize: 14
+                            font.family: "JetBrains Mono Nerd Font"
+                            font.bold: true
+                            color: "#ffffff"
+                        }
+                    }
+                }
+                
+                // Volume Slider
+                Rectangle {
+                    width: parent.width
+                    height: 44
+                    radius: 8
+                    color: "#2a2a2a"
+                    
+                    Item {
+                        anchors.fill: parent
+                        anchors.margins: 12
+                        
+                        Rectangle {
+                            id: sliderTrack
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width
+                            height: 6
+                            radius: 3
+                            color: "#404040"
+                            
+                            Rectangle {
+                                width: (targetVolumeLevel / 100) * parent.width
+                                height: parent.height
+                                radius: parent.radius
+                                color: "#ffffff"
+                            }
+                            
+                            Rectangle {
+                                id: sliderHandle
+                                width: 18
+                                height: 18
+                                radius: 9
+                                color: "#ffffff"
+                                anchors.verticalCenter: parent.verticalCenter
+                                x: Math.max(0, Math.min(parent.width - width, (targetVolumeLevel / 100) * (parent.width - width)))
+                                
+                                MouseArea {
+                                    id: sliderMouseArea
+                                    anchors.fill: parent
+                                    anchors.margins: -10
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    drag.target: sliderHandle
+                                    drag.axis: Drag.XAxis
+                                    drag.minimumX: 0
+                                    drag.maximumX: sliderTrack.width - sliderHandle.width
+                                    
+                                    onPressed: {
+                                        isDraggingVolume = true
+                                    }
+                                    
+                                    onPositionChanged: {
+                                        if (drag.active) {
+                                            var percentage = Math.max(0, Math.min(100, (sliderHandle.x / (sliderTrack.width - sliderHandle.width)) * 100))
+                                            targetVolumeLevel = Math.round(percentage)
+                                        }
+                                    }
+                                    
+                                    onReleased: {
+                                        volumeLevel = targetVolumeLevel
+                                        volSetProc.setVolume(targetVolumeLevel)
+                                        isDraggingVolume = false
+                                    }
+                                }
+                            }
+                            
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: !sliderMouseArea.drag.active
+                                onClicked: {
+                                    var percentage = Math.max(0, Math.min(100, (mouseX / width) * 100))
+                                    targetVolumeLevel = Math.round(percentage)
+                                    volumeLevel = targetVolumeLevel
+                                    volSetProc.setVolume(targetVolumeLevel)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     // Bluetooth Dropdown Window
     PopupWindow {
         id: bluetoothMenuWindow
-        visible: bluetoothMenuOpen
+        visible: bluetoothMenuOpen || btCloseAnim.running
         width: 280
         height: Math.max(btDevicesList.height + 30, 150)
         
@@ -290,15 +508,16 @@ ShellRoot {
             
             Behavior on scale {
                 NumberAnimation {
+                    id: btCloseAnim
                     duration: 200
-                    easing.type: Easing.OutCubic
+                    easing.type: bluetoothMenuOpen ? Easing.OutCubic : Easing.InCubic
                 }
             }
             
             Behavior on opacity {
                 NumberAnimation {
                     duration: 150
-                    easing.type: Easing.OutCubic
+                    easing.type: bluetoothMenuOpen ? Easing.OutCubic : Easing.InCubic
                 }
             }
         
@@ -355,14 +574,14 @@ ShellRoot {
                             text: modelData.name
                             font.pixelSize: 12
                             font.family: "JetBrains Mono Nerd Font"
-                            color: modelData.connected ? "#4CAF50" : "#ffffff"
+                            color: modelData.connected ? "#ffffff" : "#ffffff"
                         }
                         
                         Text {
                             text: modelData.connected ? "󰂱" : "󰂯"
                             font.pixelSize: 12
                             font.family: "JetBrains Mono Nerd Font"
-                            color: modelData.connected ? "#4CAF50" : "#888888"
+                            color: modelData.connected ? "#ffffff" : "#888888"
                         }
                     }
                     
@@ -399,7 +618,7 @@ ShellRoot {
     // WiFi Dropdown Window
     PopupWindow {
         id: wifiMenuWindow
-        visible: wifiMenuOpen
+        visible: wifiMenuOpen || wifiCloseAnim.running
         width: 320
         height: 400
         
@@ -417,15 +636,16 @@ ShellRoot {
             
             Behavior on scale {
                 NumberAnimation {
+                    id: wifiCloseAnim
                     duration: 200
-                    easing.type: Easing.OutCubic
+                    easing.type: wifiMenuOpen ? Easing.OutCubic : Easing.InCubic
                 }
             }
             
             Behavior on opacity {
                 NumberAnimation {
                     duration: 150
-                    easing.type: Easing.OutCubic
+                    easing.type: wifiMenuOpen ? Easing.OutCubic : Easing.InCubic
                 }
             }
         
@@ -488,7 +708,7 @@ ShellRoot {
                         width: 44
                         height: 24
                         radius: 12
-                        color: wifiEnabled ? "#4CAF50" : "#404040"
+                        color: wifiEnabled ? "#ffffff" : "#404040"
                         
                         Behavior on color {
                             ColorAnimation { duration: 150 }
@@ -498,7 +718,7 @@ ShellRoot {
                             width: 20
                             height: 20
                             radius: 10
-                            color: "#ffffff"
+                            color: wifiEnabled ? "#1a1a1a" : "#ffffff"
                             anchors.verticalCenter: parent.verticalCenter
                             x: wifiEnabled ? parent.width - width - 2 : 2
                             
@@ -536,7 +756,7 @@ ShellRoot {
                         text: "󰤨"
                         font.pixelSize: 14
                         font.family: "JetBrains Mono Nerd Font"
-                        color: "#4CAF50"
+                        color: "#ffffff"
                     }
                     
                     Text {
@@ -648,6 +868,231 @@ ShellRoot {
                 visible: !wifiEnabled || wifiNetworks.length === 0
             }
         }
+        }
+    }
+    
+    // Calendar Dropdown Window
+    PopupWindow {
+        id: calendarMenuWindow
+        visible: calendarMenuOpen || calCloseAnim.running
+        width: 320
+        height: 360
+        
+        parentWindow: bar
+        relativeX: (bar.width - width) / 2
+        relativeY: barExpanded ? 40 : 15
+        
+        color: "transparent"
+        
+        Item {
+            anchors.fill: parent
+            scale: calendarMenuOpen ? 1.0 : 0.0
+            opacity: calendarMenuOpen ? 1.0 : 0.0
+            transformOrigin: Item.Top
+            
+            Behavior on scale {
+                NumberAnimation {
+                    id: calCloseAnim
+                    duration: 200
+                    easing.type: calendarMenuOpen ? Easing.OutCubic : Easing.InCubic
+                }
+            }
+            
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: calendarMenuOpen ? Easing.OutCubic : Easing.InCubic
+                }
+            }
+        
+            Canvas {
+                id: calBowlCanvas
+                anchors.fill: parent
+            
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.clearRect(0, 0, width, height)
+                    ctx.fillStyle = "#1a1a1a"
+                    
+                    var radius = 20
+                    
+                    ctx.beginPath()
+                    ctx.moveTo(0, 0)
+                    ctx.lineTo(width, 0)
+                    ctx.lineTo(width, height - radius)
+                    ctx.arcTo(width, height, width - radius, height, radius)
+                    ctx.lineTo(radius, height)
+                    ctx.arcTo(0, height, 0, height - radius, radius)
+                    ctx.lineTo(0, 0)
+                    ctx.closePath()
+                    ctx.fill()
+                }
+                
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+            }
+            
+            Column {
+                anchors.fill: parent
+                anchors.margins: 15
+                spacing: 12
+                
+                // Month/Year header
+                Rectangle {
+                    width: parent.width
+                    height: 40
+                    radius: 8
+                    color: "#2a2a2a"
+                    
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        
+                        Text {
+                            text: "◄"
+                            font.pixelSize: 16
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: "#ffffff"
+                            
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    var newDate = new Date(currentDate)
+                                    newDate.setMonth(newDate.getMonth() - 1)
+                                    currentDate = newDate
+                                }
+                            }
+                        }
+                        
+                        Item { Layout.fillWidth: true }
+                        
+                        Text {
+                            text: Qt.formatDateTime(currentDate, "MMMM yyyy")
+                            font.pixelSize: 16
+                            font.family: "JetBrains Mono Nerd Font"
+                            font.bold: true
+                            color: "#ffffff"
+                            Layout.alignment: Qt.AlignHCenter
+                        }
+                        
+                        Item { Layout.fillWidth: true }
+                        
+                        Text {
+                            text: "►"
+                            font.pixelSize: 16
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: "#ffffff"
+                            
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    var newDate = new Date(currentDate)
+                                    newDate.setMonth(newDate.getMonth() + 1)
+                                    currentDate = newDate
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Weekday headers
+                Grid {
+                    columns: 7
+                    spacing: 4
+                    width: parent.width
+                    
+                    Repeater {
+                        model: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+                        
+                        Text {
+                            text: modelData
+                            font.pixelSize: 12
+                            font.family: "JetBrains Mono Nerd Font"
+                            font.bold: true
+                            color: "#888888"
+                            width: (parent.parent.width - 6 * parent.spacing) / 7
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+                    }
+                }
+                
+                // Calendar grid
+                Grid {
+                    id: calendarGrid
+                    columns: 7
+                    spacing: 4
+                    width: parent.width
+                    
+                    Repeater {
+                        model: {
+                            var days = []
+                            var firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+                            var lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+                            var startOffset = firstDay.getDay()
+                            var today = new Date()
+                            
+                            // Add empty cells for days before month starts
+                            for (var i = 0; i < startOffset; i++) {
+                                days.push({day: 0, isToday: false, isCurrentMonth: false})
+                            }
+                            
+                            // Add days of the month
+                            for (var d = 1; d <= lastDay.getDate(); d++) {
+                                var isToday = (d === today.getDate() && 
+                                             currentDate.getMonth() === today.getMonth() && 
+                                             currentDate.getFullYear() === today.getFullYear())
+                                days.push({day: d, isToday: isToday, isCurrentMonth: true})
+                            }
+                            
+                            return days
+                        }
+                        
+                        Rectangle {
+                            width: (calendarGrid.width - 6 * calendarGrid.spacing) / 7
+                            height: width
+                            radius: 6
+                            color: modelData.isToday ? "#ffffff" : (modelData.day > 0 ? "#2a2a2a" : "transparent")
+                            
+                            Text {
+                                anchors.centerIn: parent
+                                text: modelData.day > 0 ? modelData.day : ""
+                                font.pixelSize: 13
+                                font.family: "JetBrains Mono Nerd Font"
+                                font.bold: modelData.isToday
+                                color: modelData.isToday ? "#1a1a1a" : "#ffffff"
+                            }
+                        }
+                    }
+                }
+                
+                // Today button
+                Rectangle {
+                    width: parent.width
+                    height: 32
+                    radius: 8
+                    color: todayBtnArea.containsMouse ? "#404040" : "#2a2a2a"
+                    
+                    Text {
+                        anchors.centerIn: parent
+                        text: Qt.formatDateTime(new Date(), "M/d/yy")
+                        font.pixelSize: 13
+                        font.family: "JetBrains Mono Nerd Font"
+                        color: "#ffffff"
+                    }
+                    
+                    MouseArea {
+                        id: todayBtnArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            currentDate = new Date()
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -903,6 +1348,17 @@ ShellRoot {
                                     font.pixelSize: 14
                                     font.family: "JetBrains Mono Nerd Font"
                                     color: volumeMuted ? "#888888" : "#ffffff"
+                                    
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            volumeMenuOpen = !volumeMenuOpen
+                                            wifiMenuOpen = false
+                                            bluetoothMenuOpen = false
+                                            calendarMenuOpen = false
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -934,6 +1390,17 @@ ShellRoot {
                             clock.text = Qt.formatDateTime(new Date(), "hh:mm")
                         }
                         Component.onCompleted: triggered()
+                    }
+                    
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (!barExpanded) return
+                            calendarMenuOpen = !calendarMenuOpen
+                            bluetoothMenuOpen = false
+                            wifiMenuOpen = false
+                        }
                     }
                 }
             }
