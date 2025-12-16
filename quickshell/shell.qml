@@ -5,24 +5,58 @@ import Quickshell.Hyprland
 import Quickshell.Io
 
 ShellRoot {
+    // Bar state
     property bool barExpanded: true
+    property bool trayCollapsed: false
+    
+    // Volume
     property int volumeLevel: 0
     property bool volumeMuted: false
-    property bool bluetoothMenuOpen: false
-    property var bluetoothDevices: []
-    property int batteryLevel: 0
-    property bool batteryCharging: false
-    property bool trayCollapsed: false
-    property bool wifiMenuOpen: false
-    property bool wifiEnabled: true
-    property string wifiConnected: ""
-    property var wifiNetworks: []
-    property bool calendarMenuOpen: false
-    property date currentDate: new Date()
     property bool volumeMenuOpen: false
     property int targetVolumeLevel: volumeLevel
     property bool isDraggingVolume: false
     
+    // Bluetooth
+    property bool bluetoothMenuOpen: false
+    property var bluetoothDevices: []
+    property bool bluetoothEnabled: true
+    
+    // Battery
+    property int batteryLevel: 0
+    property bool batteryCharging: false
+    property bool batteryMenuOpen: false
+    property string powerProfile: "balanced"
+    property bool powerProfilesAvailable: false
+    property int systemUptime: 0
+    
+    // WiFi
+    property bool wifiMenuOpen: false
+    property bool wifiEnabled: true
+    property string wifiConnected: ""
+    property var wifiNetworks: []
+    
+    // Calendar
+    property bool calendarMenuOpen: false
+    property date currentDate: new Date()
+    
+    // Media
+    property string mediaTitle: ""
+    property string mediaArtist: ""
+    property string mediaThumbnail: ""
+    property bool mediaPlaying: false
+    property int mediaLength: 0
+    property int mediaPosition: 0
+    
+    // Helper function to close all menus
+    function closeAllMenus() {
+        volumeMenuOpen = false
+        bluetoothMenuOpen = false
+        wifiMenuOpen = false
+        calendarMenuOpen = false
+        batteryMenuOpen = false
+    }
+    
+    // ===== VOLUME PROCESSES =====
     Process {
         id: volProc
         command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
@@ -30,12 +64,10 @@ ShellRoot {
             onRead: data => {
                 if (!data) return
                 var match = data.match(/Volume:\s*([\d.]+)/)
-                if (match) {
+                if (match && !isDraggingVolume) {
                     var newLevel = Math.round(parseFloat(match[1]) * 100)
-                    if (!isDraggingVolume) {
-                        volumeLevel = newLevel
-                        targetVolumeLevel = newLevel
-                    }
+                    volumeLevel = newLevel
+                    targetVolumeLevel = newLevel
                 }
                 volumeMuted = data.includes("[MUTED]")
             }
@@ -48,25 +80,22 @@ ShellRoot {
         command: ["sh", "-c", "pactl subscribe | grep --line-buffered 'sink'"]
         stdout: SplitParser {
             onRead: data => {
-                if (!isDraggingVolume) {
-                    volProc.running = true
-                }
+                if (!isDraggingVolume) volProc.running = true
             }
         }
         Component.onCompleted: running = true
     }
     
-    Timer {
-        interval: 1000
-        running: true
-        repeat: true
-        onTriggered: {
-            if (!isDraggingVolume) {
-                volProc.running = true
-            }
+    Process {
+        id: volSetProc
+        command: ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "0"]
+        function setVolume(level) {
+            command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", (level / 100).toFixed(2)]
+            running = true
         }
     }
     
+    // ===== BLUETOOTH PROCESSES =====
     Process {
         id: btListProc
         command: ["bluetoothctl", "devices"]
@@ -76,14 +105,25 @@ ShellRoot {
                 var match = data.match(/Device\s+([A-F0-9:]+)\s+(.+)/)
                 if (match) {
                     var newDevices = bluetoothDevices.slice()
-                    var exists = newDevices.some(d => d.mac === match[1])
-                    if (!exists) {
+                    if (!newDevices.some(d => d.mac === match[1])) {
                         newDevices.push({mac: match[1], name: match[2], connected: false})
                         bluetoothDevices = newDevices
                     }
                 }
             }
         }
+    }
+    
+    Process {
+        id: btStatusProc
+        command: ["bluetoothctl", "show"]
+        stdout: SplitParser {
+            onRead: data => {
+                if (data?.includes("Powered: yes")) bluetoothEnabled = true
+                else if (data?.includes("Powered: no")) bluetoothEnabled = false
+            }
+        }
+        Component.onCompleted: running = true
     }
     
     Process {
@@ -96,9 +136,7 @@ ShellRoot {
                 if (match) {
                     var newDevices = bluetoothDevices.slice()
                     for (var i = 0; i < newDevices.length; i++) {
-                        if (newDevices[i].mac === match[1]) {
-                            newDevices[i].connected = true
-                        }
+                        if (newDevices[i].mac === match[1]) newDevices[i].connected = true
                     }
                     bluetoothDevices = newDevices
                 }
@@ -110,50 +148,44 @@ ShellRoot {
         id: btConnectProc
         property string targetMac: ""
         command: ["bluetoothctl", "connect", targetMac]
-        onRunningChanged: {
-            if (!running) {
-                btRefreshTimer.start()
-            }
-        }
+        onRunningChanged: if (!running) btRefreshTimer.start()
     }
     
     Process {
         id: btDisconnectProc
         property string targetMac: ""
         command: ["bluetoothctl", "disconnect", targetMac]
-        onRunningChanged: {
-            if (!running) {
-                btRefreshTimer.start()
-            }
-        }
+        onRunningChanged: if (!running) btRefreshTimer.start()
+    }
+    
+    Process {
+        id: btToggleProc
+        property bool enabling: true
+        command: ["bluetoothctl", "power", enabling ? "on" : "off"]
+        onRunningChanged: if (!running) btRefreshTimer.start()
     }
     
     Timer {
         id: btRefreshTimer
         interval: 500
-        onTriggered: {
-            bluetoothDevices = []
-            btListProc.running = true
-            btConnectedProc.running = true
-        }
+        onTriggered: refreshBluetooth()
     }
     
     function refreshBluetooth() {
         bluetoothDevices = []
+        btStatusProc.running = true
         btListProc.running = true
         btConnectedProc.running = true
     }
     
+    // ===== BATTERY PROCESSES =====
     Process {
         id: batteryProc
         command: ["sh", "-c", "cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || cat /sys/class/power_supply/BAT1/capacity 2>/dev/null || echo 0"]
         stdout: SplitParser {
             onRead: data => {
-                if (!data) return
-                var level = parseInt(data.trim())
-                if (!isNaN(level)) {
-                    batteryLevel = level
-                }
+                var level = parseInt(data?.trim())
+                if (!isNaN(level)) batteryLevel = level
             }
         }
         Component.onCompleted: running = true
@@ -163,32 +195,64 @@ ShellRoot {
         id: batteryStatusProc
         command: ["sh", "-c", "cat /sys/class/power_supply/BAT0/status 2>/dev/null || cat /sys/class/power_supply/BAT1/status 2>/dev/null || echo Unknown"]
         stdout: SplitParser {
+            onRead: data => batteryCharging = (data?.trim() === "Charging")
+        }
+        Component.onCompleted: running = true
+    }
+    
+    Process {
+        id: uptimeProc
+        command: ["sh", "-c", "cat /proc/uptime | awk '{print int($1)}'"]
+        stdout: SplitParser {
             onRead: data => {
-                if (!data) return
-                batteryCharging = (data.trim() === "Charging")
+                var seconds = parseInt(data?.trim())
+                if (!isNaN(seconds)) systemUptime = seconds
             }
         }
         Component.onCompleted: running = true
     }
     
-    Timer {
-        interval: 30000
-        running: true
-        repeat: true
-        onTriggered: {
-            batteryProc.running = true
-            batteryStatusProc.running = true
+    Process {
+        id: powerProfileProc
+        command: ["sh", "-c", "powerprofilesctl get 2>/dev/null || echo unavailable"]
+        stdout: SplitParser {
+            onRead: data => {
+                var profile = data?.trim()
+                if (profile === "unavailable") {
+                    powerProfilesAvailable = false
+                } else if (["performance", "balanced", "power-saver"].includes(profile)) {
+                    powerProfilesAvailable = true
+                    powerProfile = profile
+                }
+            }
+        }
+        Component.onCompleted: running = true
+    }
+    
+    Process {
+        id: powerProfileSetProc
+        property string profile: ""
+        command: ["sh", "-c", ""]
+        onRunningChanged: if (!running) powerProfileRefreshTimer.start()
+        function setProfile(prof) {
+            profile = prof
+            command = ["sh", "-c", "powerprofilesctl set " + prof + " 2>&1"]
+            running = true
         }
     }
     
+    Timer {
+        id: powerProfileRefreshTimer
+        interval: 500
+        onTriggered: powerProfileProc.running = true
+    }
+    
+    // ===== WIFI PROCESSES =====
     Process {
         id: wifiStatusProc
         command: ["nmcli", "-t", "-f", "WIFI", "radio"]
         stdout: SplitParser {
-            onRead: data => {
-                if (!data) return
-                wifiEnabled = (data.trim() === "enabled")
-            }
+            onRead: data => wifiEnabled = (data?.trim() === "enabled")
         }
         Component.onCompleted: running = true
     }
@@ -198,9 +262,8 @@ ShellRoot {
         command: ["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show", "--active"]
         stdout: SplitParser {
             onRead: data => {
-                if (!data) return
-                var parts = data.split(":")
-                if (parts.length >= 2 && parts[1] === "802-11-wireless") {
+                var parts = data?.split(":")
+                if (parts?.length >= 2 && parts[1] === "802-11-wireless") {
                     wifiConnected = parts[0]
                 }
             }
@@ -217,8 +280,7 @@ ShellRoot {
                 var parts = data.split(":")
                 if (parts.length >= 4 && parts[0] !== "") {
                     var newNetworks = wifiNetworks.slice()
-                    var exists = newNetworks.some(n => n.ssid === parts[0])
-                    if (!exists) {
+                    if (!newNetworks.some(n => n.ssid === parts[0])) {
                         newNetworks.push({
                             ssid: parts[0],
                             signal: parseInt(parts[1]) || 0,
@@ -236,44 +298,26 @@ ShellRoot {
         id: wifiConnectProc
         property string targetSSID: ""
         command: ["nmcli", "device", "wifi", "connect", targetSSID]
-        onRunningChanged: {
-            if (!running) {
-                wifiRefreshTimer.start()
-            }
-        }
+        onRunningChanged: if (!running) wifiRefreshTimer.start()
     }
     
     Process {
         id: wifiDisconnectProc
         command: ["nmcli", "device", "disconnect", "wlan0"]
-        onRunningChanged: {
-            if (!running) {
-                wifiRefreshTimer.start()
-            }
-        }
+        onRunningChanged: if (!running) wifiRefreshTimer.start()
     }
     
     Process {
         id: wifiToggleProc
         property bool enabling: true
         command: ["nmcli", "radio", "wifi", enabling ? "on" : "off"]
-        onRunningChanged: {
-            if (!running) {
-                wifiRefreshTimer.start()
-            }
-        }
+        onRunningChanged: if (!running) wifiRefreshTimer.start()
     }
     
     Timer {
         id: wifiRefreshTimer
         interval: 1000
-        onTriggered: {
-            wifiNetworks = []
-            wifiConnected = ""
-            wifiStatusProc.running = true
-            wifiConnectedProc.running = true
-            wifiListProc.running = true
-        }
+        onTriggered: refreshWifi()
     }
     
     function refreshWifi() {
@@ -284,13 +328,58 @@ ShellRoot {
         wifiListProc.running = true
     }
     
+    // ===== MEDIA PROCESSES =====
     Process {
-        id: volSetProc
-        command: ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "0"]
-        
-        function setVolume(level) {
-            command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", (level / 100).toFixed(2)]
-            running = true
+        id: mediaInfoProc
+        command: ["playerctl", "metadata", "--format", "{{title}}|||{{artist}}|||{{mpris:artUrl}}|||{{status}}|||{{mpris:length}}|||{{position}}"]
+        stdout: SplitParser {
+            onRead: data => {
+                if (!data || data.trim() === "") {
+                    mediaTitle = ""
+                    return
+                }
+                var parts = data.split("|||")
+                if (parts.length >= 6) {
+                    mediaTitle = parts[0] || ""
+                    mediaArtist = parts[1] || ""
+                    mediaThumbnail = parts[2] || ""
+                    mediaPlaying = parts[3] === "Playing"
+                    mediaLength = parseInt(parts[4]) || 0
+                    mediaPosition = parseInt(parts[5]) || 0
+                }
+            }
+        }
+        stderr: SplitParser {
+            onRead: data => mediaTitle = ""
+        }
+    }
+    
+    Process {
+        id: mediaControlProc
+        property string action: ""
+        command: ["playerctl", action]
+    }
+    
+    // ===== CONSOLIDATED TIMERS =====
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: {
+            if (!isDraggingVolume) volProc.running = true
+            mediaInfoProc.running = true
+        }
+    }
+    
+    Timer {
+        interval: 30000
+        running: true
+        repeat: true
+        onTriggered: {
+            batteryProc.running = true
+            batteryStatusProc.running = true
+            powerProfileProc.running = true
+            uptimeProc.running = true
         }
     }
     
@@ -299,11 +388,13 @@ ShellRoot {
         id: volumeMenuWindow
         visible: volumeMenuOpen || volCloseAnim.running
         width: 280
-        height: 120
+        height: mediaTitle !== "" ? 280 : 120
         
-        parentWindow: bar
-        relativeX: bar.width - width - 1
-        relativeY: barExpanded ? 40 : 15
+        anchor.window: bar
+        anchor.rect.x: bar.width - width - 1
+        anchor.rect.y: barExpanded ? 40 : 15
+        anchor.rect.width: width
+        anchor.rect.height: height
         
         color: "transparent"
         
@@ -359,6 +450,188 @@ ShellRoot {
                 anchors.fill: parent
                 anchors.margins: 15
                 spacing: 12
+                
+                // Media Player Section
+                Rectangle {
+                    width: parent.width
+                    height: 140
+                    radius: 8
+                    color: "#2a2a2a"
+                    visible: mediaTitle !== "" && mediaTitle !== "No Title"
+                    
+                    Column {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        spacing: 8
+                        
+                        Row {
+                            spacing: 10
+                            width: parent.width
+                            
+                            // Thumbnail
+                            Rectangle {
+                                width: 60
+                                height: 60
+                                radius: 6
+                                color: "#404040"
+                                clip: true
+                                
+                                Image {
+                                    anchors.fill: parent
+                                    source: mediaThumbnail.replace("file://", "")
+                                    fillMode: Image.PreserveAspectCrop
+                                    visible: mediaThumbnail !== ""
+                                }
+                                
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "󰝚"
+                                    font.pixelSize: 24
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    color: "#888888"
+                                    visible: mediaThumbnail === ""
+                                }
+                            }
+                            
+                            // Title and Artist
+                            Column {
+                                width: parent.width - 70
+                                spacing: 4
+                                
+                                Text {
+                                    text: mediaTitle
+                                    font.pixelSize: 13
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    font.bold: true
+                                    color: "#ffffff"
+                                    elide: Text.ElideRight
+                                    width: parent.width
+                                }
+                                
+                                Text {
+                                    text: mediaArtist
+                                    font.pixelSize: 11
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    color: "#888888"
+                                    elide: Text.ElideRight
+                                    width: parent.width
+                                }
+                                
+                                Text {
+                                    function formatTime(microseconds) {
+                                        var seconds = Math.floor(microseconds / 1000000)
+                                        var mins = Math.floor(seconds / 60)
+                                        var secs = seconds % 60
+                                        return mins + ":" + (secs < 10 ? "0" : "") + secs
+                                    }
+                                    text: formatTime(mediaPosition) + " / " + formatTime(mediaLength)
+                                    font.pixelSize: 10
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    color: "#666666"
+                                }
+                            }
+                        }
+                        
+                        // Progress Bar
+                        Rectangle {
+                            width: parent.width
+                            height: 4
+                            radius: 2
+                            color: "#404040"
+                            
+                            Rectangle {
+                                width: mediaLength > 0 ? (mediaPosition / mediaLength) * parent.width : 0
+                                height: parent.height
+                                radius: parent.radius
+                                color: "#ffffff"
+                            }
+                        }
+                        
+                        // Playback Controls
+                        Row {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            spacing: 15
+                            
+                            Rectangle {
+                                width: 36
+                                height: 36
+                                radius: 18
+                                color: prevBtnArea.containsMouse ? "#404040" : "#2a2a2a"
+                                
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "󰒮"
+                                    font.pixelSize: 18
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    color: "#ffffff"
+                                }
+                                
+                                MouseArea {
+                                    id: prevBtnArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        mediaControlProc.action = "previous"
+                                        mediaControlProc.running = true
+                                    }
+                                }
+                            }
+                            
+                            Rectangle {
+                                width: 40
+                                height: 40
+                                radius: 20
+                                color: playBtnArea.containsMouse ? "#404040" : "#2a2a2a"
+                                
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: mediaPlaying ? "󰏤" : "󰐊"
+                                    font.pixelSize: 20
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    color: "#ffffff"
+                                }
+                                
+                                MouseArea {
+                                    id: playBtnArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        mediaControlProc.action = "play-pause"
+                                        mediaControlProc.running = true
+                                    }
+                                }
+                            }
+                            
+                            Rectangle {
+                                width: 36
+                                height: 36
+                                radius: 18
+                                color: nextBtnArea.containsMouse ? "#404040" : "#2a2a2a"
+                                
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "󰒭"
+                                    font.pixelSize: 18
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    color: "#ffffff"
+                                }
+                                
+                                MouseArea {
+                                    id: nextBtnArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        mediaControlProc.action = "next"
+                                        mediaControlProc.running = true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                 
                 // Volume Header
                 Rectangle {
@@ -492,11 +765,13 @@ ShellRoot {
         id: bluetoothMenuWindow
         visible: bluetoothMenuOpen || btCloseAnim.running
         width: 280
-        height: Math.max(btDevicesList.height + 30, 150)
+        height: 250
         
-        parentWindow: bar
-        relativeX: bar.width - 300
-        relativeY: barExpanded ? 40 : 15
+        anchor.window: bar
+        anchor.rect.x: bar.width - 300
+        anchor.rect.y: barExpanded ? 40 : 15
+        anchor.rect.width: width
+        anchor.rect.height: height
         
         color: "transparent"
         
@@ -556,6 +831,91 @@ ShellRoot {
             anchors.margins: 10
             spacing: 8
             
+            // Bluetooth Toggle
+            Rectangle {
+                width: parent.width
+                height: 40
+                radius: 8
+                color: "#2a2a2a"
+                
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    
+                    Text {
+                        text: "󰂯  Bluetooth"
+                        font.pixelSize: 14
+                        font.family: "JetBrains Mono Nerd Font"
+                        color: "#ffffff"
+                    }
+                    
+                    Item { Layout.fillWidth: true }
+                    
+                    Rectangle {
+                        width: 40
+                        height: 22
+                        radius: 11
+                        color: bluetoothEnabled ? "#ffffff" : "#404040"
+                        
+                        Behavior on color {
+                            ColorAnimation { duration: 150 }
+                        }
+                        
+                        Rectangle {
+                            width: 18
+                            height: 18
+                            radius: 9
+                            color: bluetoothEnabled ? "#1a1a1a" : "#ffffff"
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: bluetoothEnabled ? parent.width - width - 2 : 2
+                            
+                            Behavior on x {
+                                NumberAnimation { duration: 150 }
+                            }
+                        }
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                btToggleProc.enabling = !bluetoothEnabled
+                                btToggleProc.running = true
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Connection Status
+            Rectangle {
+                width: parent.width
+                height: 32
+                radius: 6
+                color: "#2a2a2a"
+                
+                Text {
+                    anchors.centerIn: parent
+                    property bool anyConnected: {
+                        for (var i = 0; i < bluetoothDevices.length; i++) {
+                            if (bluetoothDevices[i].connected) return true
+                        }
+                        return false
+                    }
+                    text: bluetoothEnabled ? (anyConnected ? "󰂱 Connected" : "󰂲 Disconnected") : "󰂲 Bluetooth Off"
+                    font.pixelSize: 12
+                    font.family: "JetBrains Mono Nerd Font"
+                    color: anyConnected ? "#ffffff" : "#888888"
+                }
+            }
+            
+            // Separator
+            Rectangle {
+                width: parent.width
+                height: 1
+                color: "#404040"
+                visible: bluetoothEnabled && bluetoothDevices.length > 0
+            }
+            
             Repeater {
                 model: bluetoothDevices
                 
@@ -564,6 +924,7 @@ ShellRoot {
                     height: 36
                     radius: 4
                     color: btDeviceMouseArea.containsMouse ? "#505050" : (modelData.connected ? "#404040" : "#2a2a2a")
+                    visible: bluetoothEnabled
                     
                     RowLayout {
                         anchors.fill: parent
@@ -575,6 +936,8 @@ ShellRoot {
                             font.pixelSize: 12
                             font.family: "JetBrains Mono Nerd Font"
                             color: modelData.connected ? "#ffffff" : "#ffffff"
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
                         }
                         
                         Text {
@@ -605,11 +968,11 @@ ShellRoot {
             
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "No devices found"
+                text: bluetoothEnabled ? "No devices found" : "Bluetooth disabled"
                 font.pixelSize: 12
                 font.family: "JetBrains Mono Nerd Font"
                 color: "#888888"
-                visible: bluetoothDevices.length === 0
+                visible: !bluetoothEnabled || bluetoothDevices.length === 0
             }
         }
         }
@@ -622,9 +985,11 @@ ShellRoot {
         width: 320
         height: 400
         
-        parentWindow: bar
-        relativeX: bar.width - 380
-        relativeY: barExpanded ? 40 : 15
+        anchor.window: bar
+        anchor.rect.x: bar.width - 380
+        anchor.rect.y: barExpanded ? 40 : 15
+        anchor.rect.width: width
+        anchor.rect.height: height
         
         color: "transparent"
         
@@ -878,9 +1243,11 @@ ShellRoot {
         width: 320
         height: 360
         
-        parentWindow: bar
-        relativeX: (bar.width - width) / 2
-        relativeY: barExpanded ? 40 : 15
+        anchor.window: bar
+        anchor.rect.x: (bar.width - width) / 2
+        anchor.rect.y: barExpanded ? 40 : 15
+        anchor.rect.width: width
+        anchor.rect.height: height
         
         color: "transparent"
         
@@ -1089,6 +1456,357 @@ ShellRoot {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             currentDate = new Date()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Battery Dropdown Window
+    PopupWindow {
+        id: batteryMenuWindow
+        visible: batteryMenuOpen || batteryCloseAnim.running
+        width: 280
+        height: powerProfilesAvailable ? 240 : 140
+        
+        anchor.window: bar
+        anchor.rect.x: bar.width - width - 1
+        anchor.rect.y: barExpanded ? 40 : 15
+        anchor.rect.width: width
+        anchor.rect.height: height
+        
+        color: "transparent"
+        
+        Item {
+            anchors.fill: parent
+            scale: batteryMenuOpen ? 1.0 : 0.0
+            opacity: batteryMenuOpen ? 1.0 : 0.0
+            transformOrigin: Item.Top
+            
+            Behavior on scale {
+                NumberAnimation {
+                    id: batteryCloseAnim
+                    duration: 200
+                    easing.type: batteryMenuOpen ? Easing.OutCubic : Easing.InCubic
+                }
+            }
+            
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: batteryMenuOpen ? Easing.OutCubic : Easing.InCubic
+                }
+            }
+        
+            Canvas {
+                id: batteryBowlCanvas
+                anchors.fill: parent
+            
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.clearRect(0, 0, width, height)
+                    ctx.fillStyle = "#1a1a1a"
+                    
+                    var radius = 20
+                    
+                    ctx.beginPath()
+                    ctx.moveTo(0, 0)
+                    ctx.lineTo(width, 0)
+                    ctx.lineTo(width, height - radius)
+                    ctx.arcTo(width, height, width - radius, height, radius)
+                    ctx.lineTo(radius, height)
+                    ctx.arcTo(0, height, 0, height - radius, radius)
+                    ctx.lineTo(0, 0)
+                    ctx.closePath()
+                    ctx.fill()
+                }
+                
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+            }
+            
+            Column {
+                anchors.fill: parent
+                anchors.margins: 15
+                spacing: 12
+                
+                // Battery Status
+                Rectangle {
+                    width: parent.width
+                    height: 60
+                    radius: 8
+                    color: "#2a2a2a"
+                    
+                    Row {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        spacing: 10
+                        
+                        // Battery semi-circle indicator
+                        Item {
+                            width: 50
+                            height: 50
+                            anchors.verticalCenter: parent.verticalCenter
+                            
+                            Canvas {
+                                id: batteryArcCanvas
+                                anchors.fill: parent
+                                
+                                onPaint: {
+                                    var ctx = getContext("2d")
+                                    ctx.clearRect(0, 0, width, height)
+                                    
+                                    var centerX = width / 2
+                                    var centerY = height / 2
+                                    var radius = 20
+                                    var startAngle = -Math.PI / 2
+                                    var fillAngle = startAngle + (2 * Math.PI * (batteryLevel / 100))
+                                    
+                                    // Background circle
+                                    ctx.beginPath()
+                                    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false)
+                                    ctx.strokeStyle = "#404040"
+                                    ctx.lineWidth = 3
+                                    ctx.stroke()
+                                    
+                                    // Filled arc based on battery level
+                                    ctx.beginPath()
+                                    ctx.arc(centerX, centerY, radius, startAngle, fillAngle, false)
+                                    ctx.strokeStyle = batteryLevel <= 20 && !batteryCharging ? "#ff6b6b" : "#ffffff"
+                                    ctx.lineWidth = 3
+                                    ctx.stroke()
+                                }
+                            }
+                            
+                            Text {
+                                property string batteryIcon: {
+                                    if (batteryCharging) return "󰂄"
+                                    if (batteryLevel >= 90) return "󰁹"
+                                    if (batteryLevel >= 80) return "󰂂"
+                                    if (batteryLevel >= 70) return "󰂁"
+                                    if (batteryLevel >= 60) return "󰂀"
+                                    if (batteryLevel >= 50) return "󰁿"
+                                    if (batteryLevel >= 40) return "󰁾"
+                                    if (batteryLevel >= 30) return "󰁽"
+                                    if (batteryLevel >= 20) return "󰁼"
+                                    if (batteryLevel >= 10) return "󰁻"
+                                    return "󰁺"
+                                }
+                                anchors.centerIn: parent
+                                text: batteryIcon
+                                font.pixelSize: 20
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: batteryLevel <= 20 && !batteryCharging ? "#ff6b6b" : "#ffffff"
+                            }
+                            
+                            Timer {
+                                interval: 1000
+                                running: true
+                                repeat: true
+                                onTriggered: batteryArcCanvas.requestPaint()
+                            }
+                        }
+                        
+                        Column {
+                            spacing: 4
+                            anchors.verticalCenter: parent.verticalCenter
+                            
+                            Text {
+                                text: batteryLevel + "%"
+                                font.pixelSize: 20
+                                font.family: "JetBrains Mono Nerd Font"
+                                font.bold: true
+                                color: "#ffffff"
+                            }
+                            
+                            Text {
+                                text: batteryCharging ? "Charging" : "Discharging"
+                                font.pixelSize: 10
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: "#888888"
+                            }
+                            
+                            Text {
+                                function formatUptime(seconds) {
+                                    var days = Math.floor(seconds / 86400)
+                                    var hours = Math.floor((seconds % 86400) / 3600)
+                                    var mins = Math.floor((seconds % 3600) / 60)
+                                    if (days > 0) {
+                                        return days + "d " + hours + "h"
+                                    }
+                                    return hours + "h " + mins + "m uptime"
+                                }
+                                text: formatUptime(systemUptime)
+                                font.pixelSize: 9
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: "#666666"
+                            }
+                        }
+                    }
+                }
+                
+                // Power Profile Header
+                Text {
+                    text: powerProfilesAvailable ? "Power Profile" : "Power Profiles Unavailable"
+                    font.pixelSize: 11
+                    font.family: "JetBrains Mono Nerd Font"
+                    font.bold: true
+                    color: "#888888"
+                }
+                
+                // Info message when unavailable
+                Text {
+                    width: parent.width
+                    text: "Install and enable power-profiles-daemon"
+                    font.pixelSize: 10
+                    font.family: "JetBrains Mono Nerd Font"
+                    color: "#666666"
+                    wrapMode: Text.WordWrap
+                    visible: !powerProfilesAvailable
+                }
+                
+                // Power Profiles
+                Column {
+                    width: parent.width
+                    spacing: 6
+                    visible: powerProfilesAvailable
+                    
+                    Rectangle {
+                        width: parent.width
+                        height: 32
+                        radius: 6
+                        color: powerProfile === "performance" ? "#404040" : (perfMouseArea.containsMouse ? "#353535" : "#2a2a2a")
+                        
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 6
+                            spacing: 8
+                            
+                            Text {
+                                text: "󱐋"
+                                font.pixelSize: 14
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: "#ffffff"
+                            }
+                            
+                            Text {
+                                text: "Performance"
+                                font.pixelSize: 12
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: "#ffffff"
+                                Layout.fillWidth: true
+                            }
+                            
+                            Text {
+                                text: "󰄬"
+                                font.pixelSize: 12
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: "#ffffff"
+                                visible: powerProfile === "performance"
+                            }
+                        }
+                        
+                        MouseArea {
+                            id: perfMouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                powerProfileSetProc.setProfile("performance")
+                            }
+                        }
+                    }
+                    
+                    Rectangle {
+                        width: parent.width
+                        height: 32
+                        radius: 6
+                        color: powerProfile === "balanced" ? "#404040" : (balMouseArea.containsMouse ? "#353535" : "#2a2a2a")
+                        
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 6
+                            spacing: 8
+                            
+                            Text {
+                                text: "󰾅"
+                                font.pixelSize: 14
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: "#ffffff"
+                            }
+                            
+                            Text {
+                                text: "Balanced"
+                                font.pixelSize: 12
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: "#ffffff"
+                                Layout.fillWidth: true
+                            }
+                            
+                            Text {
+                                text: "󰄬"
+                                font.pixelSize: 12
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: "#ffffff"
+                                visible: powerProfile === "balanced"
+                            }
+                        }
+                        
+                        MouseArea {
+                            id: balMouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                powerProfileSetProc.setProfile("balanced")
+                            }
+                        }
+                    }
+                    
+                    Rectangle {
+                        width: parent.width
+                        height: 32
+                        radius: 6
+                        color: powerProfile === "power-saver" ? "#404040" : (saverMouseArea.containsMouse ? "#353535" : "#2a2a2a")
+                        
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 6
+                            spacing: 8
+                            
+                            Text {
+                                text: "󰌪"
+                                font.pixelSize: 14
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: "#ffffff"
+                            }
+                            
+                            Text {
+                                text: "Power Saver"
+                                font.pixelSize: 12
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: "#ffffff"
+                                Layout.fillWidth: true
+                            }
+                            
+                            Text {
+                                text: "󰄬"
+                                font.pixelSize: 12
+                                font.family: "JetBrains Mono Nerd Font"
+                                color: "#ffffff"
+                                visible: powerProfile === "power-saver"
+                            }
+                        }
+                        
+                        MouseArea {
+                            id: saverMouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                powerProfileSetProc.setProfile("power-saver")
+                            }
                         }
                     }
                 }
@@ -1333,6 +2051,17 @@ ShellRoot {
                                     font.pixelSize: 14
                                     font.family: "JetBrains Mono Nerd Font"
                                     color: batteryLevel <= 20 && !batteryCharging ? "#ff6b6b" : "#ffffff"
+                                    
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            batteryMenuOpen = !batteryMenuOpen
+                                            wifiMenuOpen = false
+                                            bluetoothMenuOpen = false
+                                            volumeMenuOpen = false
+                                        }
+                                    }
                                 }
                                 
                                 // Volume
