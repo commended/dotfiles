@@ -16,8 +16,8 @@ PanelWindow {
     required property int volumeLevel
     required property bool volumeMuted
     
-    signal barExpandedChanged(bool expanded)
-    signal trayCollapsedChanged(bool collapsed)
+    signal updateBarExpanded(bool expanded)
+    signal updateTrayCollapsed(bool collapsed)
     signal wifiMenuToggled()
     signal bluetoothMenuToggled()
     signal batteryMenuToggled()
@@ -162,7 +162,7 @@ PanelWindow {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: bar.trayCollapsedChanged(!trayCollapsed)
+                            onClicked: bar.updateTrayCollapsed(!trayCollapsed)
                         }
                     }
                     
@@ -412,7 +412,7 @@ PanelWindow {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    bar.barExpandedChanged(!barExpanded)
+                    bar.updateBarExpanded(!barExpanded)
                 }
                 cursorShape: Qt.PointingHandCursor
             }

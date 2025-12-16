@@ -19,9 +19,9 @@ PopupWindow {
     required property int mediaLength
     required property int mediaPosition
     
-    signal targetVolumeLevelChanged(int level)
-    signal volumeLevelChanged(int level)
-    signal isDraggingVolumeChanged(bool dragging)
+    signal updateTargetVolumeLevel(int level)
+    signal updateVolumeLevel(int level)
+    signal updateIsDraggingVolume(bool dragging)
     signal mediaControlAction(string action)
     signal setVolume(int level)
     
@@ -361,20 +361,20 @@ PopupWindow {
                                 drag.maximumX: sliderTrack.width - sliderHandle.width
                                 
                                 onPressed: {
-                                    volumeMenuWindow.isDraggingVolumeChanged(true)
+                                    volumeMenuWindow.updateIsDraggingVolume(true)
                                 }
                                 
                                 onPositionChanged: {
                                     if (drag.active) {
                                         var percentage = Math.max(0, Math.min(100, (sliderHandle.x / (sliderTrack.width - sliderHandle.width)) * 100))
-                                        volumeMenuWindow.targetVolumeLevelChanged(Math.round(percentage))
+                                        volumeMenuWindow.updateTargetVolumeLevel(Math.round(percentage))
                                     }
                                 }
                                 
                                 onReleased: {
-                                    volumeMenuWindow.volumeLevelChanged(targetVolumeLevel)
+                                    volumeMenuWindow.updateVolumeLevel(targetVolumeLevel)
                                     volumeMenuWindow.setVolume(targetVolumeLevel)
-                                    volumeMenuWindow.isDraggingVolumeChanged(false)
+                                    volumeMenuWindow.updateIsDraggingVolume(false)
                                 }
                             }
                         }
@@ -384,8 +384,8 @@ PopupWindow {
                             enabled: !sliderMouseArea.drag.active
                             onClicked: {
                                 var percentage = Math.max(0, Math.min(100, (mouseX / width) * 100))
-                                volumeMenuWindow.targetVolumeLevelChanged(Math.round(percentage))
-                                volumeMenuWindow.volumeLevelChanged(Math.round(percentage))
+                                volumeMenuWindow.updateTargetVolumeLevel(Math.round(percentage))
+                                volumeMenuWindow.updateVolumeLevel(Math.round(percentage))
                                 volumeMenuWindow.setVolume(Math.round(percentage))
                             }
                         }

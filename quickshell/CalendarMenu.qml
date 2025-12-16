@@ -10,7 +10,7 @@ PopupWindow {
     required property bool calendarMenuOpen
     required property date currentDate
     
-    signal currentDateChanged(date newDate)
+    signal updateCurrentDate(date newDate)
     
     visible: calendarMenuOpen || calCloseAnim.running
     width: 320
@@ -100,7 +100,7 @@ PopupWindow {
                             onClicked: {
                                 var newDate = new Date(currentDate)
                                 newDate.setMonth(newDate.getMonth() - 1)
-                                calendarMenuWindow.currentDateChanged(newDate)
+                                calendarMenuWindow.updateCurrentDate(newDate)
                             }
                         }
                     }
@@ -130,7 +130,7 @@ PopupWindow {
                             onClicked: {
                                 var newDate = new Date(currentDate)
                                 newDate.setMonth(newDate.getMonth() + 1)
-                                calendarMenuWindow.currentDateChanged(newDate)
+                                calendarMenuWindow.updateCurrentDate(newDate)
                             }
                         }
                     }
@@ -228,7 +228,7 @@ PopupWindow {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        calendarMenuWindow.currentDateChanged(new Date())
+                        calendarMenuWindow.updateCurrentDate(new Date())
                     }
                 }
             }
