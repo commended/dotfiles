@@ -399,9 +399,9 @@ ShellRoot {
         mediaLength: mediaLength
         mediaPosition: mediaPosition
         
-        onTargetVolumeLevelChanged: function(level) { targetVolumeLevel = level }
-        onVolumeLevelChanged: function(level) { volumeLevel = level }
-        onIsDraggingVolumeChanged: function(dragging) { isDraggingVolume = dragging }
+        onUpdateTargetVolumeLevel: function(level) { targetVolumeLevel = level }
+        onUpdateVolumeLevel: function(level) { volumeLevel = level }
+        onUpdateIsDraggingVolume: function(dragging) { isDraggingVolume = dragging }
         onMediaControlAction: function(action) {
             mediaControlProc.action = action
             mediaControlProc.running = true
@@ -460,7 +460,7 @@ ShellRoot {
         calendarMenuOpen: calendarMenuOpen
         currentDate: currentDate
         
-        onCurrentDateChanged: function(newDate) { currentDate = newDate }
+        onUpdateCurrentDate: function(newDate) { currentDate = newDate }
     }
     
     // ===== BATTERY MENU =====
@@ -490,8 +490,8 @@ ShellRoot {
         volumeLevel: volumeLevel
         volumeMuted: volumeMuted
         
-        onBarExpandedChanged: function(expanded) { barExpanded = expanded }
-        onTrayCollapsedChanged: function(collapsed) { trayCollapsed = collapsed }
+        onUpdateBarExpanded: function(expanded) { barExpanded = expanded }
+        onUpdateTrayCollapsed: function(collapsed) { trayCollapsed = collapsed }
         onWifiMenuToggled: {
             wifiMenuOpen = !wifiMenuOpen
             bluetoothMenuOpen = false
