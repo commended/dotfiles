@@ -3,49 +3,25 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
+import "components"
+import "services"
 
 ShellRoot {
-    // Bar state
+    id: root
+    
+    // ===== BAR STATE =====
     property bool barExpanded: true
     property bool trayCollapsed: false
     
-    // Volume
-    property int volumeLevel: 0
-    property bool volumeMuted: false
+    // ===== MENU STATE =====
     property bool volumeMenuOpen: false
-    property int targetVolumeLevel: volumeLevel
-    property bool isDraggingVolume: false
-    
-    // Bluetooth
     property bool bluetoothMenuOpen: false
-    property var bluetoothDevices: []
-    property bool bluetoothEnabled: true
-    
-    // Battery
-    property int batteryLevel: 0
-    property bool batteryCharging: false
     property bool batteryMenuOpen: false
-    property string powerProfile: "balanced"
-    property bool powerProfilesAvailable: false
-    property int systemUptime: 0
-    
-    // WiFi
     property bool wifiMenuOpen: false
-    property bool wifiEnabled: true
-    property string wifiConnected: ""
-    property var wifiNetworks: []
-    
-    // Calendar
     property bool calendarMenuOpen: false
-    property date currentDate: new Date()
     
-    // Media
-    property string mediaTitle: ""
-    property string mediaArtist: ""
-    property string mediaThumbnail: ""
-    property bool mediaPlaying: false
-    property int mediaLength: 0
-    property int mediaPosition: 0
+    // ===== CALENDAR STATE =====
+    property date currentDate: new Date()
     
     // Helper function to close all menus
     function closeAllMenus() {
@@ -56,308 +32,25 @@ ShellRoot {
         batteryMenuOpen = false
     }
     
-    // ===== VOLUME PROCESSES =====
-    Process {
-        id: volProc
-        command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
-        stdout: SplitParser {
-            onRead: data => {
-                if (!data) return
-                var match = data.match(/Volume:\s*([\d.]+)/)
-                if (match && !isDraggingVolume) {
-                    var newLevel = Math.round(parseFloat(match[1]) * 100)
-                    volumeLevel = newLevel
-                    targetVolumeLevel = newLevel
-                }
-                volumeMuted = data.includes("[MUTED]")
-            }
-        }
-        Component.onCompleted: running = true
+    // ===== SERVICES =====
+    VolumeService {
+        id: volumeService
     }
     
-    Process {
-        id: volWatcher
-        command: ["sh", "-c", "pactl subscribe | grep --line-buffered 'sink'"]
-        stdout: SplitParser {
-            onRead: data => {
-                if (!isDraggingVolume) volProc.running = true
-            }
-        }
-        Component.onCompleted: running = true
+    BluetoothService {
+        id: bluetoothService
     }
     
-    Process {
-        id: volSetProc
-        command: ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "0"]
-        function setVolume(level) {
-            command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", (level / 100).toFixed(2)]
-            running = true
-        }
+    BatteryService {
+        id: batteryService
     }
     
-    // ===== BLUETOOTH PROCESSES =====
-    Process {
-        id: btListProc
-        command: ["bluetoothctl", "devices"]
-        stdout: SplitParser {
-            onRead: data => {
-                if (!data || data.trim() === "") return
-                var match = data.match(/Device\s+([A-F0-9:]+)\s+(.+)/)
-                if (match) {
-                    var newDevices = bluetoothDevices.slice()
-                    if (!newDevices.some(d => d.mac === match[1])) {
-                        newDevices.push({mac: match[1], name: match[2], connected: false})
-                        bluetoothDevices = newDevices
-                    }
-                }
-            }
-        }
+    WiFiService {
+        id: wifiService
     }
     
-    Process {
-        id: btStatusProc
-        command: ["bluetoothctl", "show"]
-        stdout: SplitParser {
-            onRead: data => {
-                if (data?.includes("Powered: yes")) bluetoothEnabled = true
-                else if (data?.includes("Powered: no")) bluetoothEnabled = false
-            }
-        }
-        Component.onCompleted: running = true
-    }
-    
-    Process {
-        id: btConnectedProc
-        command: ["bluetoothctl", "devices", "Connected"]
-        stdout: SplitParser {
-            onRead: data => {
-                if (!data || data.trim() === "") return
-                var match = data.match(/Device\s+([A-F0-9:]+)\s+(.+)/)
-                if (match) {
-                    var newDevices = bluetoothDevices.slice()
-                    for (var i = 0; i < newDevices.length; i++) {
-                        if (newDevices[i].mac === match[1]) newDevices[i].connected = true
-                    }
-                    bluetoothDevices = newDevices
-                }
-            }
-        }
-    }
-    
-    Process {
-        id: btConnectProc
-        property string targetMac: ""
-        command: ["bluetoothctl", "connect", targetMac]
-        onRunningChanged: if (!running) btRefreshTimer.start()
-    }
-    
-    Process {
-        id: btDisconnectProc
-        property string targetMac: ""
-        command: ["bluetoothctl", "disconnect", targetMac]
-        onRunningChanged: if (!running) btRefreshTimer.start()
-    }
-    
-    Process {
-        id: btToggleProc
-        property bool enabling: true
-        command: ["bluetoothctl", "power", enabling ? "on" : "off"]
-        onRunningChanged: if (!running) btRefreshTimer.start()
-    }
-    
-    Timer {
-        id: btRefreshTimer
-        interval: 500
-        onTriggered: refreshBluetooth()
-    }
-    
-    function refreshBluetooth() {
-        bluetoothDevices = []
-        btStatusProc.running = true
-        btListProc.running = true
-        btConnectedProc.running = true
-    }
-    
-    // ===== BATTERY PROCESSES =====
-    Process {
-        id: batteryProc
-        command: ["sh", "-c", "cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || cat /sys/class/power_supply/BAT1/capacity 2>/dev/null || echo 0"]
-        stdout: SplitParser {
-            onRead: data => {
-                var level = parseInt(data?.trim())
-                if (!isNaN(level)) batteryLevel = level
-            }
-        }
-        Component.onCompleted: running = true
-    }
-    
-    Process {
-        id: batteryStatusProc
-        command: ["sh", "-c", "cat /sys/class/power_supply/BAT0/status 2>/dev/null || cat /sys/class/power_supply/BAT1/status 2>/dev/null || echo Unknown"]
-        stdout: SplitParser {
-            onRead: data => batteryCharging = (data?.trim() === "Charging")
-        }
-        Component.onCompleted: running = true
-    }
-    
-    Process {
-        id: uptimeProc
-        command: ["sh", "-c", "cat /proc/uptime | awk '{print int($1)}'"]
-        stdout: SplitParser {
-            onRead: data => {
-                var seconds = parseInt(data?.trim())
-                if (!isNaN(seconds)) systemUptime = seconds
-            }
-        }
-        Component.onCompleted: running = true
-    }
-    
-    Process {
-        id: powerProfileProc
-        command: ["sh", "-c", "powerprofilesctl get 2>/dev/null || echo unavailable"]
-        stdout: SplitParser {
-            onRead: data => {
-                var profile = data?.trim()
-                if (profile === "unavailable") {
-                    powerProfilesAvailable = false
-                } else if (["performance", "balanced", "power-saver"].includes(profile)) {
-                    powerProfilesAvailable = true
-                    powerProfile = profile
-                }
-            }
-        }
-        Component.onCompleted: running = true
-    }
-    
-    Process {
-        id: powerProfileSetProc
-        property string profile: ""
-        command: ["sh", "-c", ""]
-        onRunningChanged: if (!running) powerProfileRefreshTimer.start()
-        function setProfile(prof) {
-            profile = prof
-            command = ["sh", "-c", "powerprofilesctl set " + prof + " 2>&1"]
-            running = true
-        }
-    }
-    
-    Timer {
-        id: powerProfileRefreshTimer
-        interval: 500
-        onTriggered: powerProfileProc.running = true
-    }
-    
-    // ===== WIFI PROCESSES =====
-    Process {
-        id: wifiStatusProc
-        command: ["nmcli", "-t", "-f", "WIFI", "radio"]
-        stdout: SplitParser {
-            onRead: data => wifiEnabled = (data?.trim() === "enabled")
-        }
-        Component.onCompleted: running = true
-    }
-    
-    Process {
-        id: wifiConnectedProc
-        command: ["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show", "--active"]
-        stdout: SplitParser {
-            onRead: data => {
-                var parts = data?.split(":")
-                if (parts?.length >= 2 && parts[1] === "802-11-wireless") {
-                    wifiConnected = parts[0]
-                }
-            }
-        }
-        Component.onCompleted: running = true
-    }
-    
-    Process {
-        id: wifiListProc
-        command: ["nmcli", "-t", "-f", "SSID,SIGNAL,SECURITY,IN-USE", "device", "wifi", "list"]
-        stdout: SplitParser {
-            onRead: data => {
-                if (!data || data.trim() === "") return
-                var parts = data.split(":")
-                if (parts.length >= 4 && parts[0] !== "") {
-                    var newNetworks = wifiNetworks.slice()
-                    if (!newNetworks.some(n => n.ssid === parts[0])) {
-                        newNetworks.push({
-                            ssid: parts[0],
-                            signal: parseInt(parts[1]) || 0,
-                            security: parts[2] || "",
-                            connected: parts[3] === "*"
-                        })
-                        wifiNetworks = newNetworks
-                    }
-                }
-            }
-        }
-    }
-    
-    Process {
-        id: wifiConnectProc
-        property string targetSSID: ""
-        command: ["nmcli", "device", "wifi", "connect", targetSSID]
-        onRunningChanged: if (!running) wifiRefreshTimer.start()
-    }
-    
-    Process {
-        id: wifiDisconnectProc
-        command: ["nmcli", "device", "disconnect", "wlan0"]
-        onRunningChanged: if (!running) wifiRefreshTimer.start()
-    }
-    
-    Process {
-        id: wifiToggleProc
-        property bool enabling: true
-        command: ["nmcli", "radio", "wifi", enabling ? "on" : "off"]
-        onRunningChanged: if (!running) wifiRefreshTimer.start()
-    }
-    
-    Timer {
-        id: wifiRefreshTimer
-        interval: 1000
-        onTriggered: refreshWifi()
-    }
-    
-    function refreshWifi() {
-        wifiNetworks = []
-        wifiConnected = ""
-        wifiStatusProc.running = true
-        wifiConnectedProc.running = true
-        wifiListProc.running = true
-    }
-    
-    // ===== MEDIA PROCESSES =====
-    Process {
-        id: mediaInfoProc
-        command: ["playerctl", "metadata", "--format", "{{title}}|||{{artist}}|||{{mpris:artUrl}}|||{{status}}|||{{mpris:length}}|||{{position}}"]
-        stdout: SplitParser {
-            onRead: data => {
-                if (!data || data.trim() === "") {
-                    mediaTitle = ""
-                    return
-                }
-                var parts = data.split("|||")
-                if (parts.length >= 6) {
-                    mediaTitle = parts[0] || ""
-                    mediaArtist = parts[1] || ""
-                    mediaThumbnail = parts[2] || ""
-                    mediaPlaying = parts[3] === "Playing"
-                    mediaLength = parseInt(parts[4]) || 0
-                    mediaPosition = parseInt(parts[5]) || 0
-                }
-            }
-        }
-        stderr: SplitParser {
-            onRead: data => mediaTitle = ""
-        }
-    }
-    
-    Process {
-        id: mediaControlProc
-        property string action: ""
-        command: ["playerctl", action]
+    MediaService {
+        id: mediaService
     }
     
     // ===== CONSOLIDATED TIMERS =====
@@ -366,8 +59,8 @@ ShellRoot {
         running: true
         repeat: true
         onTriggered: {
-            if (!isDraggingVolume) volProc.running = true
-            mediaInfoProc.running = true
+            volumeService.refresh()
+            mediaService.refresh()
         }
     }
     
@@ -376,149 +69,152 @@ ShellRoot {
         running: true
         repeat: true
         onTriggered: {
-            batteryProc.running = true
-            batteryStatusProc.running = true
-            powerProfileProc.running = true
-            uptimeProc.running = true
+            batteryService.refresh()
         }
     }
     
-    // ===== VOLUME MENU =====
+    // ===== POPUP MENUS =====
     VolumeMenu {
         barWindow: bar
-        barExpanded: barExpanded
-        volumeLevel: volumeLevel
-        volumeMuted: volumeMuted
-        volumeMenuOpen: volumeMenuOpen
-        targetVolumeLevel: targetVolumeLevel
-        isDraggingVolume: isDraggingVolume
-        mediaTitle: mediaTitle
-        mediaArtist: mediaArtist
-        mediaThumbnail: mediaThumbnail
-        mediaPlaying: mediaPlaying
-        mediaLength: mediaLength
-        mediaPosition: mediaPosition
+        barExpanded: root.barExpanded
+        menuOpen: volumeMenuOpen
+        volumeLevel: volumeService.volumeLevel
+        targetVolumeLevel: volumeService.targetVolumeLevel
+        volumeMuted: volumeService.volumeMuted
+        isDraggingVolume: volumeService.isDraggingVolume
+        mediaTitle: mediaService.mediaTitle
+        mediaArtist: mediaService.mediaArtist
+        mediaThumbnail: mediaService.mediaThumbnail
+        mediaPlaying: mediaService.mediaPlaying
+        mediaLength: mediaService.mediaLength
+        mediaPosition: mediaService.mediaPosition
         
-        onUpdateTargetVolumeLevel: function(level) { targetVolumeLevel = level }
-        onUpdateVolumeLevel: function(level) { volumeLevel = level }
-        onUpdateIsDraggingVolume: function(dragging) { isDraggingVolume = dragging }
-        onMediaControlAction: function(action) {
-            mediaControlProc.action = action
-            mediaControlProc.running = true
+        onVolumeChanged: (level) => {
+            volumeService.targetVolumeLevel = level
         }
-        onSetVolume: function(level) { volSetProc.setVolume(level) }
+        onVolumeDragStarted: {
+            volumeService.isDraggingVolume = true
+        }
+        onVolumeDragEnded: (level) => {
+            volumeService.volumeLevel = level
+            volumeService.targetVolumeLevel = level
+            volumeService.setVolume(level)
+            volumeService.isDraggingVolume = false
+        }
+        onMediaControl: (action) => {
+            mediaService.control(action)
+        }
     }
     
-    // ===== BLUETOOTH MENU =====
     BluetoothMenu {
         barWindow: bar
-        barExpanded: barExpanded
-        bluetoothMenuOpen: bluetoothMenuOpen
-        bluetoothDevices: bluetoothDevices
-        bluetoothEnabled: bluetoothEnabled
+        barExpanded: root.barExpanded
+        menuOpen: bluetoothMenuOpen
+        bluetoothDevices: bluetoothService.bluetoothDevices
+        bluetoothEnabled: bluetoothService.bluetoothEnabled
         
-        onToggleBluetooth: function(enabling) {
-            btToggleProc.enabling = enabling
-            btToggleProc.running = true
+        onToggleBluetooth: (enable) => {
+            bluetoothService.toggleBluetooth(enable)
         }
-        onConnectDevice: function(mac) {
-            btConnectProc.targetMac = mac
-            btConnectProc.running = true
+        onConnectDevice: (mac) => {
+            bluetoothService.connectDevice(mac)
         }
-        onDisconnectDevice: function(mac) {
-            btDisconnectProc.targetMac = mac
-            btDisconnectProc.running = true
+        onDisconnectDevice: (mac) => {
+            bluetoothService.disconnectDevice(mac)
         }
     }
     
-    // ===== WIFI MENU =====
-    WifiMenu {
+    WiFiMenu {
         barWindow: bar
-        barExpanded: barExpanded
-        wifiMenuOpen: wifiMenuOpen
-        wifiEnabled: wifiEnabled
-        wifiConnected: wifiConnected
-        wifiNetworks: wifiNetworks
+        barExpanded: root.barExpanded
+        menuOpen: wifiMenuOpen
+        wifiEnabled: wifiService.wifiEnabled
+        wifiConnected: wifiService.wifiConnected
+        wifiNetworks: wifiService.wifiNetworks
         
-        onToggleWifi: function(enabling) {
-            wifiToggleProc.enabling = enabling
-            wifiToggleProc.running = true
+        onToggleWifi: (enable) => {
+            wifiService.toggleWifi(enable)
         }
-        onConnectNetwork: function(ssid) {
-            wifiConnectProc.targetSSID = ssid
-            wifiConnectProc.running = true
+        onConnectNetwork: (ssid) => {
+            wifiService.connectNetwork(ssid)
         }
         onDisconnectNetwork: {
-            wifiDisconnectProc.running = true
+            wifiService.disconnectNetwork()
         }
     }
     
-    // ===== CALENDAR MENU =====
     CalendarMenu {
         barWindow: bar
-        barExpanded: barExpanded
-        calendarMenuOpen: calendarMenuOpen
-        currentDate: currentDate
+        barExpanded: root.barExpanded
+        menuOpen: calendarMenuOpen
+        currentDate: root.currentDate
         
-        onUpdateCurrentDate: function(newDate) { currentDate = newDate }
+        onDateChanged: (newDate) => {
+            root.currentDate = newDate
+        }
     }
     
-    // ===== BATTERY MENU =====
     BatteryMenu {
         barWindow: bar
-        barExpanded: barExpanded
-        batteryMenuOpen: batteryMenuOpen
-        batteryLevel: batteryLevel
-        batteryCharging: batteryCharging
-        powerProfile: powerProfile
-        powerProfilesAvailable: powerProfilesAvailable
-        systemUptime: systemUptime
+        barExpanded: root.barExpanded
+        menuOpen: batteryMenuOpen
+        batteryLevel: batteryService.batteryLevel
+        batteryCharging: batteryService.batteryCharging
+        powerProfile: batteryService.powerProfile
+        powerProfilesAvailable: batteryService.powerProfilesAvailable
+        systemUptime: batteryService.systemUptime
         
-        onSetPowerProfile: function(profile) { powerProfileSetProc.setProfile(profile) }
+        onSetProfile: (profile) => {
+            batteryService.setProfile(profile)
+        }
     }
     
     // ===== MAIN BAR =====
     Bar {
         id: bar
-        barExpanded: barExpanded
-        trayCollapsed: trayCollapsed
-        wifiEnabled: wifiEnabled
-        wifiConnected: wifiConnected
-        bluetoothEnabled: bluetoothEnabled
-        batteryLevel: batteryLevel
-        batteryCharging: batteryCharging
-        volumeLevel: volumeLevel
-        volumeMuted: volumeMuted
+        barExpanded: root.barExpanded
+        trayCollapsed: root.trayCollapsed
+        wifiEnabled: wifiService.wifiEnabled
+        wifiConnected: wifiService.wifiConnected
+        bluetoothEnabled: bluetoothService.bluetoothEnabled
+        batteryLevel: batteryService.batteryLevel
+        batteryCharging: batteryService.batteryCharging
+        volumeLevel: volumeService.volumeLevel
+        volumeMuted: volumeService.volumeMuted
         
-        onUpdateBarExpanded: function(expanded) { barExpanded = expanded }
-        onUpdateTrayCollapsed: function(collapsed) { trayCollapsed = collapsed }
-        onWifiMenuToggled: {
-            wifiMenuOpen = !wifiMenuOpen
-            bluetoothMenuOpen = false
-            if (wifiMenuOpen) {
-                refreshWifi()
-            }
+        onToggleBarExpanded: {
+            root.barExpanded = !root.barExpanded
         }
-        onBluetoothMenuToggled: {
-            bluetoothMenuOpen = !bluetoothMenuOpen
-            wifiMenuOpen = false
-            if (bluetoothMenuOpen) {
-                refreshBluetooth()
-            }
+        onToggleTrayCollapsed: {
+            root.trayCollapsed = !root.trayCollapsed
         }
-        onBatteryMenuToggled: {
-            batteryMenuOpen = !batteryMenuOpen
-            wifiMenuOpen = false
-            bluetoothMenuOpen = false
-            volumeMenuOpen = false
-        }
-        onVolumeMenuToggled: {
+        onOpenVolumeMenu: {
             volumeMenuOpen = !volumeMenuOpen
             wifiMenuOpen = false
             bluetoothMenuOpen = false
             calendarMenuOpen = false
         }
-        onCalendarMenuToggled: {
+        onOpenBluetoothMenu: {
+            bluetoothMenuOpen = !bluetoothMenuOpen
+            wifiMenuOpen = false
+            if (bluetoothMenuOpen) {
+                bluetoothService.refresh()
+            }
+        }
+        onOpenWifiMenu: {
+            wifiMenuOpen = !wifiMenuOpen
+            bluetoothMenuOpen = false
+            if (wifiMenuOpen) {
+                wifiService.refresh()
+            }
+        }
+        onOpenBatteryMenu: {
+            batteryMenuOpen = !batteryMenuOpen
+            wifiMenuOpen = false
+            bluetoothMenuOpen = false
+            volumeMenuOpen = false
+        }
+        onOpenCalendarMenu: {
             calendarMenuOpen = !calendarMenuOpen
             bluetoothMenuOpen = false
             wifiMenuOpen = false
