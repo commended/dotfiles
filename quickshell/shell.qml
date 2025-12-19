@@ -19,6 +19,7 @@ ShellRoot {
     property bool batteryMenuOpen: false
     property bool wifiMenuOpen: false
     property bool calendarMenuOpen: false
+    property bool brightnessMenuOpen: false
     
     // ===== CALENDAR STATE =====
     property date currentDate: new Date()
@@ -30,6 +31,7 @@ ShellRoot {
         wifiMenuOpen = false
         calendarMenuOpen = false
         batteryMenuOpen = false
+        brightnessMenuOpen = false
     }
     
     // ===== SERVICES =====
@@ -53,9 +55,13 @@ ShellRoot {
         id: mediaService
     }
     
+    BrightnessService {
+        id: brightnessService
+    }
+    
     // ===== CONSOLIDATED TIMERS =====
     Timer {
-        interval: 1000
+        interval: 500
         running: true
         repeat: true
         onTriggered: {
@@ -169,6 +175,28 @@ ShellRoot {
         }
     }
     
+    BrightnessMenu {
+        barWindow: bar
+        barExpanded: root.barExpanded
+        menuOpen: brightnessMenuOpen
+        brightnessLevel: brightnessService.brightnessLevel
+        targetBrightnessLevel: brightnessService.targetBrightnessLevel
+        isDraggingBrightness: brightnessService.isDraggingBrightness
+        
+        onBrightnessChanged: (level) => {
+            brightnessService.targetBrightnessLevel = level
+            brightnessService.getMonitor("active")?.setBrightness(level / 100)
+        }
+        onBrightnessDragStarted: {
+            brightnessService.isDraggingBrightness = true
+        }
+        onBrightnessDragEnded: (level) => {
+            brightnessService.getMonitor("active")?.setBrightness(level / 100)
+            brightnessService.targetBrightnessLevel = level
+            brightnessService.isDraggingBrightness = false
+        }
+    }
+    
     // ===== MAIN BAR =====
     Bar {
         id: bar
@@ -181,6 +209,7 @@ ShellRoot {
         batteryCharging: batteryService.batteryCharging
         volumeLevel: volumeService.volumeLevel
         volumeMuted: volumeService.volumeMuted
+        brightnessLevel: brightnessService.brightnessLevel
         
         onToggleBarExpanded: {
             root.barExpanded = !root.barExpanded
@@ -219,5 +248,18 @@ ShellRoot {
             bluetoothMenuOpen = false
             wifiMenuOpen = false
         }
+        onOpenBrightnessMenu: {
+            brightnessMenuOpen = !brightnessMenuOpen
+            wifiMenuOpen = false
+            bluetoothMenuOpen = false
+            volumeMenuOpen = false
+            batteryMenuOpen = false
+        }
+    }
+    
+    // ===== RIGHT BAR =====
+    RightBar {
+        id: rightBar
+        barExpanded: root.barExpanded
     }
 }
