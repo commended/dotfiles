@@ -15,6 +15,7 @@ PanelWindow {
     required property bool batteryCharging
     required property int volumeLevel
     required property bool volumeMuted
+    required property int brightnessLevel
     
     signal toggleBarExpanded()
     signal toggleTrayCollapsed()
@@ -23,6 +24,7 @@ PanelWindow {
     signal openWifiMenu()
     signal openBatteryMenu()
     signal openCalendarMenu()
+    signal openBrightnessMenu()
     
     anchors {
         top: true
@@ -79,11 +81,20 @@ PanelWindow {
                 visible: barExpanded
             }
             
+            MouseArea {
+                anchors.fill: parent
+                enabled: !barExpanded
+                onClicked: bar.toggleBarExpanded()
+            }
+
+            
+            
             RowLayout {
                 anchors.fill: parent
                 anchors.margins: 8
                 spacing: 12
                 opacity: barExpanded ? 1.0 : 0.0
+                visible: barExpanded
                 
                 Behavior on opacity {
                     NumberAnimation {
@@ -125,6 +136,7 @@ PanelWindow {
                             
                             MouseArea {
                                 anchors.fill: parent
+                                enabled: barExpanded
                                 onClicked: {
                                     Hyprland.dispatch("workspace " + (index + 1))
                                 }
@@ -137,142 +149,175 @@ PanelWindow {
                 Item {
                     Layout.fillWidth: true
                 }
+            }
+            
+            // Tray Container
+            Row {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.rightMargin: 8
+                spacing: 0
+                opacity: barExpanded ? 1.0 : 0.0
                 
-                // Tray Container
-                Row {
-                    spacing: 0
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 300
+                        easing.type: Easing.InOutCubic
+                    }
+                }
+                
+                // Collapse Arrow
+                Rectangle {
+                    width: 24
+                    height: 24
+                    radius: 6
+                    color: trayArrowArea.containsMouse ? "#404040" : "#2a2a2a"
+                    anchors.verticalCenter: parent.verticalCenter
+                    opacity: 1.0
                     
-                    // Collapse Arrow
-                    Rectangle {
-                        width: 24
-                        height: 24
-                        radius: 6
-                        color: trayArrowArea.containsMouse ? "#404040" : "#2a2a2a"
-                        
-                        Text {
-                            anchors.centerIn: parent
-                            text: trayCollapsed ? "<" : ">"
-                            font.pixelSize: 12
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#ffffff"
-                        }
-                        
-                        MouseArea {
-                            id: trayArrowArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: bar.toggleTrayCollapsed()
+                    Text {
+                        anchors.centerIn: parent
+                        text: trayCollapsed ? "<" : ">"
+                        font.pixelSize: 12
+                        font.family: "JetBrains Mono Nerd Font"
+                        color: "#ffffff"
+                    }
+                    
+                    MouseArea {
+                        id: trayArrowArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: bar.toggleTrayCollapsed()
+                    }
+                }
+                
+                // Tray Bubble
+                Rectangle {
+                    width: trayCollapsed ? 0 : trayRow.width + 20
+                    height: 24
+                    radius: 6
+                    color: "#2a2a2a"
+                    clip: true
+                    anchors.verticalCenter: parent.verticalCenter
+                    
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: 200
+                            easing.type: Easing.InOutQuad
                         }
                     }
                     
-                    // Tray Bubble
-                    Rectangle {
-                        width: trayCollapsed ? 0 : trayRow.width + 20
-                        height: 24
-                        radius: 6
-                        color: "#2a2a2a"
-                        clip: true
+                    Row {
+                        id: trayRow
+                        anchors.centerIn: parent
+                        spacing: 12
+                        opacity: trayCollapsed ? 0.0 : 1.0
                         
-                        Behavior on width {
+                        Behavior on opacity {
                             NumberAnimation {
-                                duration: 200
+                                duration: 150
                                 easing.type: Easing.InOutQuad
                             }
                         }
                         
-                        Row {
-                            id: trayRow
-                            anchors.centerIn: parent
-                            spacing: 12
-                            opacity: trayCollapsed ? 0.0 : 1.0
-                            
-                            Behavior on opacity {
-                                NumberAnimation {
-                                    duration: 150
-                                    easing.type: Easing.InOutQuad
-                                }
+                        // WiFi
+                        Text {
+                            property string wifiIcon: {
+                                if (!wifiEnabled) return "󰤭"
+                                if (wifiConnected === "") return "󰤯"
+                                return "󰤨"
                             }
+                            text: wifiIcon
+                            font.pixelSize: 16
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: wifiEnabled ? "#ffffff" : "#888888"
                             
-                            // WiFi
-                            Text {
-                                property string wifiIcon: {
-                                    if (!wifiEnabled) return "󰤭"
-                                    if (wifiConnected === "") return "󰤯"
-                                    return "󰤨"
-                                }
-                                text: wifiIcon
-                                font.pixelSize: 16
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: wifiEnabled ? "#ffffff" : "#888888"
-                                
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: bar.openWifiMenu()
-                                }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                enabled: barExpanded
+                                onClicked: bar.openWifiMenu()
                             }
+                        }
+                        
+                        // Bluetooth
+                        Text {
+                            text: "󰂯"
+                            font.pixelSize: 16
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: "#ffffff"
                             
-                            // Bluetooth
-                            Text {
-                                text: "󰂯"
-                                font.pixelSize: 16
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: "#ffffff"
-                                
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: bar.openBluetoothMenu()
-                                }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                enabled: barExpanded
+                                onClicked: bar.openBluetoothMenu()
                             }
-                            
-                            // Battery
-                            Text {
-                                property string batteryIcon: {
-                                    if (batteryCharging) return "󰂄"
-                                    if (batteryLevel >= 90) return "󰁹"
-                                    if (batteryLevel >= 80) return "󰂂"
-                                    if (batteryLevel >= 70) return "󰂁"
-                                    if (batteryLevel >= 60) return "󰂀"
-                                    if (batteryLevel >= 50) return "󰁿"
-                                    if (batteryLevel >= 40) return "󰁾"
-                                    if (batteryLevel >= 30) return "󰁽"
-                                    if (batteryLevel >= 20) return "󰁼"
-                                    if (batteryLevel >= 10) return "󰁻"
-                                    return "󰁺"
-                                }
-                                text: batteryIcon + " " + batteryLevel + "%"
-                                font.pixelSize: 14
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: batteryLevel <= 20 && !batteryCharging ? "#ff6b6b" : "#ffffff"
-                                
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: bar.openBatteryMenu()
-                                }
+                        }
+                        
+                        // Battery
+                        Text {
+                            property string batteryIcon: {
+                                if (batteryCharging) return "󰂄"
+                                if (batteryLevel >= 90) return "󰁹"
+                                if (batteryLevel >= 80) return "󰂂"
+                                if (batteryLevel >= 70) return "󰂁"
+                                if (batteryLevel >= 60) return "󰂀"
+                                if (batteryLevel >= 50) return "󰁿"
+                                if (batteryLevel >= 40) return "󰁾"
+                                if (batteryLevel >= 30) return "󰁽"
+                                if (batteryLevel >= 20) return "󰁼"
+                                if (batteryLevel >= 10) return "󰁻"
+                                return "󰁺"
                             }
+                            text: batteryIcon + " " + batteryLevel + "%"
+                            font.pixelSize: 14
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: batteryLevel <= 20 && !batteryCharging ? "#ff6b6b" : "#ffffff"
                             
-                            // Volume
-                            Text {
-                                property string volIcon: {
-                                    if (volumeMuted) return "󰝟"
-                                    if (volumeLevel >= 66) return "󰕾"
-                                    if (volumeLevel >= 33) return "󰖀"
-                                    if (volumeLevel > 0) return "󰕿"
-                                    return "󰝟"
-                                }
-                                text: volIcon + " " + volumeLevel + "%"
-                                font.pixelSize: 14
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: volumeMuted ? "#888888" : "#ffffff"
-                                
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: bar.openVolumeMenu()
-                                }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                enabled: barExpanded
+                                onClicked: bar.openBatteryMenu()
+                            }
+                        }
+                        
+                        // Volume
+                        Text {
+                            property string volIcon: {
+                                if (volumeMuted) return "󰝟"
+                                if (volumeLevel >= 66) return "󰕾"
+                                if (volumeLevel >= 33) return "󰖀"
+                                if (volumeLevel > 0) return "󰕿"
+                                return "󰝟"
+                            }
+                            text: volIcon + " " + volumeLevel + "%"
+                            font.pixelSize: 14
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: volumeMuted ? "#888888" : "#ffffff"
+                            
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                enabled: barExpanded
+                                onClicked: bar.openVolumeMenu()
+                            }
+                        }
+                        
+                        // Brightness
+                        Text {
+                            text: "󰃠 " + brightnessLevel + "%"
+                            font.pixelSize: 14
+                            font.family: "JetBrains Mono Nerd Font"
+                            color: "#ffffff"
+                            
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                enabled: barExpanded
+                                onClicked: bar.openBrightnessMenu()
                             }
                         }
                     }
