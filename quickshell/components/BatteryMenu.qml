@@ -21,7 +21,7 @@ PopupWindow {
     height: powerProfilesAvailable ? 240 : 140
     
     anchor.window: barWindow
-    anchor.rect.x: barWindow.width - width - 1
+    anchor.rect.x: barWindow.width - width - 15  // Align with right bar
     anchor.rect.y: barExpanded ? 40 : 15
     anchor.rect.width: width
     anchor.rect.height: height
@@ -63,8 +63,7 @@ PopupWindow {
                 ctx.beginPath()
                 ctx.moveTo(0, 0)
                 ctx.lineTo(width, 0)
-                ctx.lineTo(width, height - radius)
-                ctx.arcTo(width, height, width - radius, height, radius)
+                ctx.lineTo(width, height)  // Straight line to bottom-right (no curve)
                 ctx.lineTo(radius, height)
                 ctx.arcTo(0, height, 0, height - radius, radius)
                 ctx.lineTo(0, 0)
