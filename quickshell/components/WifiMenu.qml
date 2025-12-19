@@ -21,7 +21,7 @@ PopupWindow {
     height: 400
     
     anchor.window: barWindow
-    anchor.rect.x: barWindow.width - 380
+    anchor.rect.x: barWindow.width - 415
     anchor.rect.y: barExpanded ? 40 : 15
     anchor.rect.width: width
     anchor.rect.height: height
