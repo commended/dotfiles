@@ -38,7 +38,7 @@ PanelWindow {
         bottom: barExpanded ? 0 : -35
     }
     
-    exclusiveZone: barExpanded ? 40 : 5
+    exclusiveZone: barExpanded ? 50 : 5
     
     color: "transparent"
     
@@ -359,6 +359,56 @@ PanelWindow {
                         bar.openCalendarMenu()
                     }
                 }
+            }
+        }
+        
+        // Right corner arch connector
+        Item {
+            anchors {
+                top: mainBar.bottom
+                right: parent.right
+            }
+            width: 60
+            height: barExpanded ? 100 : 60
+            
+            Behavior on height {
+                NumberAnimation {
+                    duration: 300
+                    easing.type: Easing.InOutCubic
+                }
+            }
+            
+            Behavior on width {
+                NumberAnimation {
+                    duration: 300
+                    easing.type: Easing.InOutCubic
+                }
+            }
+            
+            Canvas {
+                anchors.fill: parent
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.clearRect(0, 0, width, height)
+                    ctx.fillStyle = "#1a1a1a"
+                    ctx.beginPath()
+                    
+                    // Start at bottom-right corner
+                    ctx.moveTo(width, height)
+                    // Line to top-right
+                    ctx.lineTo(width, 0)
+                    // Line to top-left
+                    ctx.lineTo(0, 0)
+                    // Arc from top-left back to bottom-right with slightly larger radius for smoother curve
+                    var radius = width * 1.2
+                    ctx.arcTo(width, 0, width, height, radius)
+                    // Continue line down to bottom
+                    ctx.lineTo(width, height)
+                    ctx.closePath()
+                    ctx.fill()
+                }
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
             }
         }
         
