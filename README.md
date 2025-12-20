@@ -1,5 +1,7 @@
 # My Dotfiles
 
+<img alt="Static Badge" src="https://img.shields.io/badge/qml-black?style=for-the-badge&logo=qt&logoColor=white"> <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/commended/dotfiles?style=for-the-badge&logo=github&color=black">
+
 ## Showcase
 
 ### Screenshots
