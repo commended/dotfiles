@@ -21,6 +21,18 @@ ShellRoot {
     property bool calendarMenuOpen: false
     property bool brightnessMenuOpen: false
     
+    // ===== NOTIFICATION STATE =====
+    property bool notificationVisible: false
+    property string notificationType: ""
+    property int notificationValue: 0
+    property string notificationBluetoothDevice: ""
+    property bool notificationBluetoothConnected: false
+    
+    // ===== PREVIOUS VALUES FOR CHANGE DETECTION =====
+    property int previousVolumeLevel: -1
+    property int previousBrightnessLevel: -1
+    property var previousBluetoothDevices: []
+    
     // ===== CALENDAR STATE =====
     property date currentDate: new Date()
     
@@ -34,9 +46,26 @@ ShellRoot {
         brightnessMenuOpen = false
     }
     
+    // Helper function to show notification
+    function showNotification(type, value, btDevice, btConnected) {
+        notificationType = type
+        notificationValue = value || 0
+        notificationBluetoothDevice = btDevice || ""
+        notificationBluetoothConnected = btConnected || false
+        notificationVisible = true
+        notificationTimer.restart()
+    }
+    
     // ===== SERVICES =====
     VolumeService {
         id: volumeService
+        
+        onVolumeLevelChanged: {
+            if (previousVolumeLevel !== -1 && previousVolumeLevel !== volumeLevel && !isDraggingVolume) {
+                showNotification("volume", volumeLevel)
+            }
+            previousVolumeLevel = volumeLevel
+        }
     }
     
     BluetoothService {
@@ -57,6 +86,75 @@ ShellRoot {
     
     BrightnessService {
         id: brightnessService
+        
+        onBrightnessLevelChanged: {
+            if (previousBrightnessLevel !== -1 && previousBrightnessLevel !== brightnessLevel && !isDraggingBrightness) {
+                showNotification("brightness", brightnessLevel)
+            }
+            previousBrightnessLevel = brightnessLevel
+        }
+    }
+    
+    // ===== NOTIFICATION TIMER =====
+    Timer {
+        id: notificationTimer
+        interval: 3000
+        onTriggered: {
+            notificationVisible = false
+        }
+    }
+    
+    // Initialize previous values after a short delay
+    Timer {
+        id: initTimer
+        interval: 2000
+        running: true
+        onTriggered: {
+            previousVolumeLevel = volumeService.volumeLevel
+            previousBrightnessLevel = brightnessService.brightnessLevel
+            previousBluetoothDevices = JSON.parse(JSON.stringify(bluetoothService.bluetoothDevices))
+            console.log("Notification system initialized")
+        }
+    }
+    
+    // Watch for Bluetooth connection changes (not when menu opens)
+    Timer {
+        id: bluetoothWatcher
+        interval: 2000
+        running: true
+        repeat: true
+        onTriggered: {
+            if (previousBluetoothDevices.length === 0 || bluetoothMenuOpen) {
+                // Skip if not initialized or menu is open
+                return
+            }
+            
+            var currentDevices = bluetoothService.bluetoothDevices
+            
+            // Check for connection state changes
+            for (var i = 0; i < currentDevices.length; i++) {
+                var device = currentDevices[i]
+                var previousDevice = null
+                
+                // Find the previous state of this device
+                for (var j = 0; j < previousBluetoothDevices.length; j++) {
+                    if (previousBluetoothDevices[j].mac === device.mac) {
+                        previousDevice = previousBluetoothDevices[j]
+                        break
+                    }
+                }
+                
+                // Show notification if connection state changed
+                if (previousDevice && device.connected !== previousDevice.connected) {
+                    console.log("Bluetooth state changed:", device.name, device.connected)
+                    showNotification("bluetooth", 0, device.name, device.connected)
+                    break  // Only show one notification at a time
+                }
+            }
+            
+            // Save current state for next comparison
+            previousBluetoothDevices = JSON.parse(JSON.stringify(currentDevices))
+        }
     }
     
     // ===== CONSOLIDATED TIMERS =====
@@ -77,6 +175,17 @@ ShellRoot {
         onTriggered: {
             batteryService.refresh()
         }
+    }
+    
+    // ===== NOTIFICATION POPUP =====
+    NotificationPopup {
+        barWindow: bar
+        barExpanded: root.barExpanded
+        notifVisible: notificationVisible
+        notificationType: root.notificationType
+        value: root.notificationValue
+        bluetoothDeviceName: root.notificationBluetoothDevice
+        bluetoothConnected: root.notificationBluetoothConnected
     }
     
     // ===== POPUP MENUS =====
