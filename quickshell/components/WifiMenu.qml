@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import ".."
 
 PopupWindow {
     id: wifiMenuWindow
@@ -37,14 +38,14 @@ PopupWindow {
         Behavior on scale {
             NumberAnimation {
                 id: wifiCloseAnim
-                duration: 200
+                duration: Theme.animationDurationNormal
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
         
         Behavior on opacity {
             NumberAnimation {
-                duration: 150
+                duration: Theme.animationDurationFast
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
@@ -56,9 +57,9 @@ PopupWindow {
             onPaint: {
                 var ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
-                ctx.fillStyle = "#1a1a1a"
+                ctx.fillStyle = Theme.background
                 
-                var radius = 20
+                var radius = Theme.radiusFull
                 
                 ctx.beginPath()
                 ctx.moveTo(0, 0)
@@ -81,59 +82,34 @@ PopupWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: 12
-            spacing: 10
+            anchors.margins: Theme.marginMedium
+            spacing: Theme.marginDefault
             
             // WiFi Toggle
             Rectangle {
                 width: parent.width
                 height: 44
-                radius: 8
-                color: "#2a2a2a"
+                radius: Theme.radiusMedium
+                color: Theme.surface
                 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 10
+                    anchors.margins: Theme.marginDefault
                     
                     Text {
                         text: "󰤨  WiFi"
-                        font.pixelSize: 16
-                        font.family: "JetBrains Mono Nerd Font"
-                        color: "#ffffff"
+                        font.pixelSize: Theme.fontSizeLarge
+                        font.family: Theme.fontFamily
+                        color: Theme.textPrimary
                     }
                     
                     Item { Layout.fillWidth: true }
                     
-                    Rectangle {
-                        width: 44
-                        height: 24
-                        radius: 12
-                        color: wifiEnabled ? "#ffffff" : "#404040"
-                        
-                        Behavior on color {
-                            ColorAnimation { duration: 150 }
-                        }
-                        
-                        Rectangle {
-                            width: 20
-                            height: 20
-                            radius: 10
-                            color: wifiEnabled ? "#1a1a1a" : "#ffffff"
-                            anchors.verticalCenter: parent.verticalCenter
-                            x: wifiEnabled ? parent.width - width - 2 : 2
-                            
-                            Behavior on x {
-                                NumberAnimation { duration: 150 }
-                            }
-                        }
-                        
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                wifiMenuWindow.toggleWifi(!wifiEnabled)
-                            }
-                        }
+                    ToggleSwitch {
+                        switchWidth: 44
+                        switchHeight: 24
+                        checked: wifiEnabled
+                        onToggled: (value) => wifiMenuWindow.toggleWifi(value)
                     }
                 }
             }
@@ -142,43 +118,41 @@ PopupWindow {
             Rectangle {
                 width: parent.width
                 height: wifiConnected !== "" ? 30 : 0
-                radius: 4
-                color: "#404040"
+                radius: Theme.spacingSmall
+                color: Theme.surfaceHover
                 visible: wifiConnected !== ""
                 
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 5
-                    spacing: 8
+                    spacing: Theme.spacingMedium
                     
                     Text {
                         text: "󰤨"
-                        font.pixelSize: 14
-                        font.family: "JetBrains Mono Nerd Font"
-                        color: "#ffffff"
+                        font.pixelSize: Theme.fontSizeMedium
+                        font.family: Theme.fontFamily
+                        color: Theme.textPrimary
                     }
                     
                     Text {
                         text: wifiConnected
-                        font.pixelSize: 12
-                        font.family: "JetBrains Mono Nerd Font"
-                        color: "#ffffff"
+                        font.pixelSize: Theme.fontSizeDefault
+                        font.family: Theme.fontFamily
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     
                     Text {
                         text: "Disconnect"
-                        font.pixelSize: 10
-                        font.family: "JetBrains Mono Nerd Font"
-                        color: "#ff6b6b"
+                        font.pixelSize: Theme.fontSizeSmall
+                        font.family: Theme.fontFamily
+                        color: Theme.textDanger
                         
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                wifiMenuWindow.disconnectNetwork()
-                            }
+                            onClicked: wifiMenuWindow.disconnectNetwork()
                         }
                     }
                 }
@@ -188,7 +162,7 @@ PopupWindow {
             Rectangle {
                 width: parent.width
                 height: 1
-                color: "#404040"
+                color: Theme.separator
                 visible: wifiEnabled && wifiNetworks.length > 0
             }
             
@@ -198,7 +172,7 @@ PopupWindow {
                 width: parent.width
                 height: 200
                 model: wifiNetworks
-                spacing: 6
+                spacing: Theme.radiusSmall
                 interactive: true
                 clip: true
                 visible: wifiEnabled
@@ -206,42 +180,36 @@ PopupWindow {
                 delegate: Rectangle {
                     width: wifiListView.width
                     height: 36
-                    radius: 6
-                    color: wifiNetMouseArea.containsMouse ? "#505050" : "#2a2a2a"
+                    radius: Theme.radiusSmall
+                    color: wifiNetMouseArea.containsMouse ? Theme.surfaceActive : Theme.surface
                     visible: !modelData.connected
                     
                     RowLayout {
                         anchors.fill: parent
                         anchors.margins: 5
-                        spacing: 8
+                        spacing: Theme.spacingMedium
                         
                         Text {
-                            property string signalIcon: {
-                                if (modelData.signal >= 75) return "󰤨"
-                                if (modelData.signal >= 50) return "󰤥"
-                                if (modelData.signal >= 25) return "󰤢"
-                                return "󰤟"
-                            }
-                            text: signalIcon
-                            font.pixelSize: 14
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#888888"
+                            text: Theme.getWifiSignalIcon(modelData.signal)
+                            font.pixelSize: Theme.fontSizeMedium
+                            font.family: Theme.fontFamily
+                            color: Theme.textSecondary
                         }
                         
                         Text {
                             text: modelData.ssid
-                            font.pixelSize: 12
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#ffffff"
+                            font.pixelSize: Theme.fontSizeDefault
+                            font.family: Theme.fontFamily
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
                         
                         Text {
                             text: modelData.security !== "" ? "󰌾" : ""
-                            font.pixelSize: 10
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#888888"
+                            font.pixelSize: Theme.fontSizeSmall
+                            font.family: Theme.fontFamily
+                            color: Theme.textSecondary
                         }
                     }
                     
@@ -250,9 +218,7 @@ PopupWindow {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            wifiMenuWindow.connectNetwork(modelData.ssid)
-                        }
+                        onClicked: wifiMenuWindow.connectNetwork(modelData.ssid)
                     }
                 }
             }
@@ -260,9 +226,9 @@ PopupWindow {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: wifiEnabled ? "No networks found" : "WiFi disabled"
-                font.pixelSize: 12
-                font.family: "JetBrains Mono Nerd Font"
-                color: "#888888"
+                font.pixelSize: Theme.fontSizeDefault
+                font.family: Theme.fontFamily
+                color: Theme.textSecondary
                 visible: !wifiEnabled || wifiNetworks.length === 0
             }
         }
