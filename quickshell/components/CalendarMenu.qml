@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import ".."
 
 PopupWindow {
     id: calendarMenuWindow
@@ -33,14 +34,14 @@ PopupWindow {
         Behavior on scale {
             NumberAnimation {
                 id: calCloseAnim
-                duration: 200
+                duration: Theme.animationDurationNormal
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
         
         Behavior on opacity {
             NumberAnimation {
-                duration: 150
+                duration: Theme.animationDurationFast
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
@@ -52,9 +53,9 @@ PopupWindow {
             onPaint: {
                 var ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
-                ctx.fillStyle = "#1a1a1a"
+                ctx.fillStyle = Theme.background
                 
-                var radius = 20
+                var radius = Theme.radiusFull
                 
                 ctx.beginPath()
                 ctx.moveTo(0, 0)
@@ -74,25 +75,25 @@ PopupWindow {
         
         Column {
             anchors.fill: parent
-            anchors.margins: 15
-            spacing: 12
+            anchors.margins: Theme.marginLarge
+            spacing: Theme.spacingLarge
             
             // Month/Year header
             Rectangle {
                 width: parent.width
                 height: 40
-                radius: 8
-                color: "#2a2a2a"
+                radius: Theme.radiusMedium
+                color: Theme.surface
                 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 8
+                    anchors.margins: Theme.spacingMedium
                     
                     Text {
                         text: "◄"
-                        font.pixelSize: 16
-                        font.family: "JetBrains Mono Nerd Font"
-                        color: "#ffffff"
+                        font.pixelSize: Theme.fontSizeLarge
+                        font.family: Theme.fontFamily
+                        color: Theme.textPrimary
                         
                         MouseArea {
                             anchors.fill: parent
@@ -109,10 +110,10 @@ PopupWindow {
                     
                     Text {
                         text: Qt.formatDateTime(currentDate, "MMMM yyyy")
-                        font.pixelSize: 16
-                        font.family: "JetBrains Mono Nerd Font"
+                        font.pixelSize: Theme.fontSizeLarge
+                        font.family: Theme.fontFamily
                         font.bold: true
-                        color: "#ffffff"
+                        color: Theme.textPrimary
                         Layout.alignment: Qt.AlignHCenter
                     }
                     
@@ -120,9 +121,9 @@ PopupWindow {
                     
                     Text {
                         text: "►"
-                        font.pixelSize: 16
-                        font.family: "JetBrains Mono Nerd Font"
-                        color: "#ffffff"
+                        font.pixelSize: Theme.fontSizeLarge
+                        font.family: Theme.fontFamily
+                        color: Theme.textPrimary
                         
                         MouseArea {
                             anchors.fill: parent
@@ -140,7 +141,7 @@ PopupWindow {
             // Weekday headers
             Grid {
                 columns: 7
-                spacing: 4
+                spacing: Theme.spacingSmall
                 width: parent.width
                 
                 Repeater {
@@ -148,10 +149,10 @@ PopupWindow {
                     
                     Text {
                         text: modelData
-                        font.pixelSize: 12
-                        font.family: "JetBrains Mono Nerd Font"
+                        font.pixelSize: Theme.fontSizeDefault
+                        font.family: Theme.fontFamily
                         font.bold: true
-                        color: "#888888"
+                        color: Theme.textSecondary
                         width: (parent.parent.width - 6 * parent.spacing) / 7
                         horizontalAlignment: Text.AlignHCenter
                     }
@@ -162,7 +163,7 @@ PopupWindow {
             Grid {
                 id: calendarGrid
                 columns: 7
-                spacing: 4
+                spacing: Theme.spacingSmall
                 width: parent.width
                 
                 Repeater {
@@ -173,12 +174,10 @@ PopupWindow {
                         var startOffset = firstDay.getDay()
                         var today = new Date()
                         
-                        // Add empty cells for days before month starts
                         for (var i = 0; i < startOffset; i++) {
                             days.push({day: 0, isToday: false, isCurrentMonth: false})
                         }
                         
-                        // Add days of the month
                         for (var d = 1; d <= lastDay.getDate(); d++) {
                             var isToday = (d === today.getDate() && 
                                          currentDate.getMonth() === today.getMonth() && 
@@ -192,16 +191,16 @@ PopupWindow {
                     Rectangle {
                         width: (calendarGrid.width - 6 * calendarGrid.spacing) / 7
                         height: width
-                        radius: 6
-                        color: modelData.isToday ? "#ffffff" : (modelData.day > 0 ? "#2a2a2a" : "transparent")
+                        radius: Theme.radiusSmall
+                        color: modelData.isToday ? Theme.accent : (modelData.day > 0 ? Theme.surface : "transparent")
                         
                         Text {
                             anchors.centerIn: parent
                             text: modelData.day > 0 ? modelData.day : ""
                             font.pixelSize: 13
-                            font.family: "JetBrains Mono Nerd Font"
+                            font.family: Theme.fontFamily
                             font.bold: modelData.isToday
-                            color: modelData.isToday ? "#1a1a1a" : "#ffffff"
+                            color: modelData.isToday ? Theme.accentText : Theme.textPrimary
                         }
                     }
                 }
@@ -211,15 +210,15 @@ PopupWindow {
             Rectangle {
                 width: parent.width
                 height: 32
-                radius: 8
-                color: todayBtnArea.containsMouse ? "#404040" : "#2a2a2a"
+                radius: Theme.radiusMedium
+                color: todayBtnArea.containsMouse ? Theme.surfaceHover : Theme.surface
                 
                 Text {
                     anchors.centerIn: parent
                     text: Qt.formatDateTime(new Date(), "M/d/yy")
                     font.pixelSize: 13
-                    font.family: "JetBrains Mono Nerd Font"
-                    color: "#ffffff"
+                    font.family: Theme.fontFamily
+                    color: Theme.textPrimary
                 }
                 
                 MouseArea {
@@ -227,9 +226,7 @@ PopupWindow {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        calendarMenuWindow.dateChanged(new Date())
-                    }
+                    onClicked: calendarMenuWindow.dateChanged(new Date())
                 }
             }
         }
