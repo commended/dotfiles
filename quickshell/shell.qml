@@ -12,6 +12,8 @@ ShellRoot {
     // ===== BAR STATE =====
     property bool barExpanded: true
     property bool trayCollapsed: false
+    property bool rightBarExpanded: false
+    property bool rightTrayCollapsed: false
     
     // ===== MENU STATE =====
     property bool volumeMenuOpen: false
@@ -28,7 +30,7 @@ ShellRoot {
     property string notificationBluetoothDevice: ""
     property bool notificationBluetoothConnected: false
     
-    // ===== PREVIOUS VALUES FOR CHANGE DETECTION =====
+    // ===== CHANGE DETECTION =====
     property int previousVolumeLevel: -1
     property int previousBrightnessLevel: -1
     property var previousBluetoothDevices: []
@@ -36,7 +38,7 @@ ShellRoot {
     // ===== CALENDAR STATE =====
     property date currentDate: new Date()
     
-    // Helper function to close all menus
+    // ===== HELPER FUNCTIONS =====
     function closeAllMenus() {
         volumeMenuOpen = false
         bluetoothMenuOpen = false
@@ -46,7 +48,42 @@ ShellRoot {
         brightnessMenuOpen = false
     }
     
-    // Helper function to show notification
+    function openMenu(menuName) {
+        closeAllMenus()
+        switch (menuName) {
+            case "volume": volumeMenuOpen = true; break
+            case "bluetooth": 
+                bluetoothMenuOpen = true
+                bluetoothService.refresh()
+                break
+            case "wifi":
+                wifiMenuOpen = true
+                wifiService.refresh()
+                break
+            case "battery": batteryMenuOpen = true; break
+            case "calendar": calendarMenuOpen = true; break
+            case "brightness": brightnessMenuOpen = true; break
+        }
+    }
+    
+    function toggleMenu(menuName) {
+        var wasOpen = false
+        switch (menuName) {
+            case "volume": wasOpen = volumeMenuOpen; break
+            case "bluetooth": wasOpen = bluetoothMenuOpen; break
+            case "wifi": wasOpen = wifiMenuOpen; break
+            case "battery": wasOpen = batteryMenuOpen; break
+            case "calendar": wasOpen = calendarMenuOpen; break
+            case "brightness": wasOpen = brightnessMenuOpen; break
+        }
+        
+        if (wasOpen) {
+            closeAllMenus()
+        } else {
+            openMenu(menuName)
+        }
+    }
+    
     function showNotification(type, value, btDevice, btConnected) {
         notificationType = type
         notificationValue = value || 0
@@ -306,6 +343,27 @@ ShellRoot {
         }
     }
     
+    // ===== POWER MENU =====
+    PowerMenu {
+        barWindow: rightBar
+        menuOpen: rightBarExpanded
+        
+        onLockClicked: {
+            root.rightBarExpanded = false
+            Quickshell.execDetached(["hyprlock"])
+        }
+        
+        onRestartClicked: {
+            root.rightBarExpanded = false
+            Quickshell.execDetached(["reboot"])
+        }
+        
+        onPowerClicked: {
+            root.rightBarExpanded = false
+            Quickshell.execDetached(["shutdown", "now"])
+        }
+    }
+    
     // ===== MAIN BAR =====
     Bar {
         id: bar
@@ -320,55 +378,28 @@ ShellRoot {
         volumeMuted: volumeService.volumeMuted
         brightnessLevel: brightnessService.brightnessLevel
         
-        onToggleBarExpanded: {
-            root.barExpanded = !root.barExpanded
-        }
-        onToggleTrayCollapsed: {
-            root.trayCollapsed = !root.trayCollapsed
-        }
-        onOpenVolumeMenu: {
-            volumeMenuOpen = !volumeMenuOpen
-            wifiMenuOpen = false
-            bluetoothMenuOpen = false
-            calendarMenuOpen = false
-        }
-        onOpenBluetoothMenu: {
-            bluetoothMenuOpen = !bluetoothMenuOpen
-            wifiMenuOpen = false
-            if (bluetoothMenuOpen) {
-                bluetoothService.refresh()
-            }
-        }
-        onOpenWifiMenu: {
-            wifiMenuOpen = !wifiMenuOpen
-            bluetoothMenuOpen = false
-            if (wifiMenuOpen) {
-                wifiService.refresh()
-            }
-        }
-        onOpenBatteryMenu: {
-            batteryMenuOpen = !batteryMenuOpen
-            wifiMenuOpen = false
-            bluetoothMenuOpen = false
-            volumeMenuOpen = false
-        }
-        onOpenCalendarMenu: {
-            calendarMenuOpen = !calendarMenuOpen
-            bluetoothMenuOpen = false
-            wifiMenuOpen = false
-        }
-        onOpenBrightnessMenu: {
-            brightnessMenuOpen = !brightnessMenuOpen
-            wifiMenuOpen = false
-            bluetoothMenuOpen = false
-            volumeMenuOpen = false
-            batteryMenuOpen = false
-        }
+        onToggleBarExpanded: root.barExpanded = !root.barExpanded
+        onToggleTrayCollapsed: root.trayCollapsed = !root.trayCollapsed
+        onOpenVolumeMenu: root.toggleMenu("volume")
+        onOpenBluetoothMenu: root.toggleMenu("bluetooth")
+        onOpenWifiMenu: root.toggleMenu("wifi")
+        onOpenBatteryMenu: root.toggleMenu("battery")
+        onOpenCalendarMenu: root.toggleMenu("calendar")
+        onOpenBrightnessMenu: root.toggleMenu("brightness")
     }
     
     // ===== RIGHT BAR =====
     RightBar {
         id: rightBar
         barExpanded: root.barExpanded
+        rightBarExpanded: root.rightBarExpanded
+        rightTrayCollapsed: root.rightTrayCollapsed
+        
+        onToggleRightBar: {
+            root.rightBarExpanded = !root.rightBarExpanded
+            root.closeAllMenus()
+        }
+        
+        onToggleRightTrayCollapsed: root.rightTrayCollapsed = !root.rightTrayCollapsed
     }
 }
