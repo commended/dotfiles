@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import ".."
 
 PopupWindow {
     id: volumeMenuWindow
@@ -29,7 +30,7 @@ PopupWindow {
     height: mediaTitle !== "" ? 280 : 120
     
     anchor.window: barWindow
-    anchor.rect.x: barWindow.width - width - 15  // Align with right bar
+    anchor.rect.x: barWindow.width - width - 15
     anchor.rect.y: barExpanded ? 40 : 15
     anchor.rect.width: width
     anchor.rect.height: height
@@ -45,14 +46,14 @@ PopupWindow {
         Behavior on scale {
             NumberAnimation {
                 id: volCloseAnim
-                duration: 200
+                duration: Theme.animationDurationNormal
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
         
         Behavior on opacity {
             NumberAnimation {
-                duration: 150
+                duration: Theme.animationDurationFast
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
@@ -64,14 +65,14 @@ PopupWindow {
             onPaint: {
                 var ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
-                ctx.fillStyle = "#1a1a1a"
+                ctx.fillStyle = Theme.background
                 
-                var radius = 20
+                var radius = Theme.radiusFull
                 
                 ctx.beginPath()
                 ctx.moveTo(0, 0)
                 ctx.lineTo(width, 0)
-                ctx.lineTo(width, height)  // Straight line to bottom-right (no curve)
+                ctx.lineTo(width, height)
                 ctx.lineTo(radius, height)
                 ctx.arcTo(0, height, 0, height - radius, radius)
                 ctx.lineTo(0, 0)
@@ -85,32 +86,32 @@ PopupWindow {
         
         Column {
             anchors.fill: parent
-            anchors.margins: 15
-            spacing: 12
+            anchors.margins: Theme.marginLarge
+            spacing: Theme.spacingLarge
             
             // Media Player Section
             Rectangle {
                 width: parent.width
                 height: 140
-                radius: 8
-                color: "#2a2a2a"
+                radius: Theme.radiusMedium
+                color: Theme.surface
                 visible: mediaTitle !== "" && mediaTitle !== "No Title"
                 
                 Column {
                     anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 8
+                    anchors.margins: Theme.marginDefault
+                    spacing: Theme.spacingMedium
                     
                     Row {
-                        spacing: 10
+                        spacing: Theme.marginDefault
                         width: parent.width
                         
                         // Thumbnail
                         Rectangle {
                             width: 60
                             height: 60
-                            radius: 6
-                            color: "#404040"
+                            radius: Theme.radiusSmall
+                            color: Theme.surfaceHover
                             clip: true
                             
                             Image {
@@ -123,9 +124,9 @@ PopupWindow {
                             Text {
                                 anchors.centerIn: parent
                                 text: "󰝚"
-                                font.pixelSize: 24
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: "#888888"
+                                font.pixelSize: Theme.fontSizeIconLarge
+                                font.family: Theme.fontFamily
+                                color: Theme.textSecondary
                                 visible: mediaThumbnail === ""
                             }
                         }
@@ -133,14 +134,14 @@ PopupWindow {
                         // Title and Artist
                         Column {
                             width: parent.width - 70
-                            spacing: 4
+                            spacing: Theme.spacingSmall
                             
                             Text {
                                 text: mediaTitle
                                 font.pixelSize: 13
-                                font.family: "JetBrains Mono Nerd Font"
+                                font.family: Theme.fontFamily
                                 font.bold: true
-                                color: "#ffffff"
+                                color: Theme.textPrimary
                                 elide: Text.ElideRight
                                 width: parent.width
                             }
@@ -148,23 +149,17 @@ PopupWindow {
                             Text {
                                 text: mediaArtist
                                 font.pixelSize: 11
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: "#888888"
+                                font.family: Theme.fontFamily
+                                color: Theme.textSecondary
                                 elide: Text.ElideRight
                                 width: parent.width
                             }
                             
                             Text {
-                                function formatTime(microseconds) {
-                                    var seconds = Math.floor(microseconds / 1000000)
-                                    var mins = Math.floor(seconds / 60)
-                                    var secs = seconds % 60
-                                    return mins + ":" + (secs < 10 ? "0" : "") + secs
-                                }
-                                text: formatTime(mediaPosition) + " / " + formatTime(mediaLength)
-                                font.pixelSize: 10
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: "#666666"
+                                text: Theme.formatTime(mediaPosition) + " / " + Theme.formatTime(mediaLength)
+                                font.pixelSize: Theme.fontSizeSmall
+                                font.family: Theme.fontFamily
+                                color: Theme.textDisabled
                             }
                         }
                     }
@@ -174,33 +169,33 @@ PopupWindow {
                         width: parent.width
                         height: 4
                         radius: 2
-                        color: "#404040"
+                        color: Theme.surfaceHover
                         
                         Rectangle {
                             width: mediaLength > 0 ? (mediaPosition / mediaLength) * parent.width : 0
                             height: parent.height
                             radius: parent.radius
-                            color: "#ffffff"
+                            color: Theme.accent
                         }
                     }
                     
                     // Playback Controls
                     Row {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        spacing: 15
+                        spacing: Theme.marginLarge
                         
                         Rectangle {
                             width: 36
                             height: 36
-                            radius: 18
-                            color: prevBtnArea.containsMouse ? "#404040" : "#2a2a2a"
+                            radius: Theme.radiusRound
+                            color: prevBtnArea.containsMouse ? Theme.surfaceHover : Theme.surface
                             
                             Text {
                                 anchors.centerIn: parent
                                 text: "󰒮"
-                                font.pixelSize: 18
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: "#ffffff"
+                                font.pixelSize: Theme.fontSizeIcon
+                                font.family: Theme.fontFamily
+                                color: Theme.textPrimary
                             }
                             
                             MouseArea {
@@ -216,14 +211,14 @@ PopupWindow {
                             width: 40
                             height: 40
                             radius: 20
-                            color: playBtnArea.containsMouse ? "#404040" : "#2a2a2a"
+                            color: playBtnArea.containsMouse ? Theme.surfaceHover : Theme.surface
                             
                             Text {
                                 anchors.centerIn: parent
                                 text: mediaPlaying ? "󰏤" : "󰐊"
-                                font.pixelSize: 20
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: "#ffffff"
+                                font.pixelSize: Theme.fontSizeXLarge
+                                font.family: Theme.fontFamily
+                                color: Theme.textPrimary
                             }
                             
                             MouseArea {
@@ -238,15 +233,15 @@ PopupWindow {
                         Rectangle {
                             width: 36
                             height: 36
-                            radius: 18
-                            color: nextBtnArea.containsMouse ? "#404040" : "#2a2a2a"
+                            radius: Theme.radiusRound
+                            color: nextBtnArea.containsMouse ? Theme.surfaceHover : Theme.surface
                             
                             Text {
                                 anchors.centerIn: parent
                                 text: "󰒭"
-                                font.pixelSize: 18
-                                font.family: "JetBrains Mono Nerd Font"
-                                color: "#ffffff"
+                                font.pixelSize: Theme.fontSizeIcon
+                                font.family: Theme.fontFamily
+                                color: Theme.textPrimary
                             }
                             
                             MouseArea {
@@ -265,43 +260,36 @@ PopupWindow {
             Rectangle {
                 width: parent.width
                 height: 36
-                radius: 8
-                color: "#2a2a2a"
+                radius: Theme.radiusMedium
+                color: Theme.surface
                 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 8
-                    spacing: 10
+                    anchors.margins: Theme.spacingMedium
+                    spacing: Theme.marginDefault
                     
                     Text {
-                        property string volIcon: {
-                            if (volumeMuted) return "󰝟"
-                            if (volumeLevel >= 66) return "󰕾"
-                            if (volumeLevel >= 33) return "󰖀"
-                            if (volumeLevel > 0) return "󰕿"
-                            return "󰝟"
-                        }
-                        text: volIcon
-                        font.pixelSize: 18
-                        font.family: "JetBrains Mono Nerd Font"
-                        color: volumeMuted ? "#888888" : "#ffffff"
+                        text: Theme.getVolumeIcon(volumeLevel, volumeMuted)
+                        font.pixelSize: Theme.fontSizeIcon
+                        font.family: Theme.fontFamily
+                        color: volumeMuted ? Theme.textSecondary : Theme.textPrimary
                     }
                     
                     Text {
                         text: "Volume"
-                        font.pixelSize: 14
-                        font.family: "JetBrains Mono Nerd Font"
-                        color: "#ffffff"
+                        font.pixelSize: Theme.fontSizeMedium
+                        font.family: Theme.fontFamily
+                        color: Theme.textPrimary
                     }
                     
                     Item { Layout.fillWidth: true }
                     
                     Text {
                         text: targetVolumeLevel + "%"
-                        font.pixelSize: 14
-                        font.family: "JetBrains Mono Nerd Font"
+                        font.pixelSize: Theme.fontSizeMedium
+                        font.family: Theme.fontFamily
                         font.bold: true
-                        color: "#ffffff"
+                        color: Theme.textPrimary
                     }
                 }
             }
@@ -310,12 +298,12 @@ PopupWindow {
             Rectangle {
                 width: parent.width
                 height: 44
-                radius: 8
-                color: "#2a2a2a"
+                radius: Theme.radiusMedium
+                color: Theme.surface
                 
                 Item {
                     anchors.fill: parent
-                    anchors.margins: 12
+                    anchors.margins: Theme.spacingLarge
                     
                     Rectangle {
                         id: sliderTrack
@@ -323,13 +311,13 @@ PopupWindow {
                         width: parent.width
                         height: 6
                         radius: 3
-                        color: "#404040"
+                        color: Theme.surfaceHover
                         
                         Rectangle {
                             width: (targetVolumeLevel / 100) * parent.width
                             height: parent.height
                             radius: parent.radius
-                            color: "#ffffff"
+                            color: Theme.accent
                         }
                         
                         Rectangle {
@@ -337,7 +325,7 @@ PopupWindow {
                             width: 18
                             height: 18
                             radius: 9
-                            color: "#ffffff"
+                            color: Theme.accent
                             anchors.verticalCenter: parent.verticalCenter
                             x: Math.max(0, Math.min(parent.width - width, (targetVolumeLevel / 100) * (parent.width - width)))
                             
@@ -352,9 +340,7 @@ PopupWindow {
                                 drag.minimumX: 0
                                 drag.maximumX: sliderTrack.width - sliderHandle.width
                                 
-                                onPressed: {
-                                    volumeMenuWindow.volumeDragStarted()
-                                }
+                                onPressed: volumeMenuWindow.volumeDragStarted()
                                 
                                 onPositionChanged: {
                                     if (drag.active) {
