@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import ".."
 
 PopupWindow {
     id: batteryMenuWindow
@@ -21,7 +22,7 @@ PopupWindow {
     height: powerProfilesAvailable ? 240 : 140
     
     anchor.window: barWindow
-    anchor.rect.x: barWindow.width - width - 15  // Align with right bar
+    anchor.rect.x: barWindow.width - width - 15
     anchor.rect.y: barExpanded ? 40 : 15
     anchor.rect.width: width
     anchor.rect.height: height
@@ -37,14 +38,14 @@ PopupWindow {
         Behavior on scale {
             NumberAnimation {
                 id: batteryCloseAnim
-                duration: 200
+                duration: Theme.animationDurationNormal
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
         
         Behavior on opacity {
             NumberAnimation {
-                duration: 150
+                duration: Theme.animationDurationFast
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
@@ -56,14 +57,14 @@ PopupWindow {
             onPaint: {
                 var ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
-                ctx.fillStyle = "#1a1a1a"
+                ctx.fillStyle = Theme.background
                 
-                var radius = 20
+                var radius = Theme.radiusFull
                 
                 ctx.beginPath()
                 ctx.moveTo(0, 0)
                 ctx.lineTo(width, 0)
-                ctx.lineTo(width, height)  // Straight line to bottom-right (no curve)
+                ctx.lineTo(width, height)
                 ctx.lineTo(radius, height)
                 ctx.arcTo(0, height, 0, height - radius, radius)
                 ctx.lineTo(0, 0)
@@ -77,22 +78,22 @@ PopupWindow {
         
         Column {
             anchors.fill: parent
-            anchors.margins: 15
-            spacing: 12
+            anchors.margins: Theme.marginLarge
+            spacing: Theme.spacingLarge
             
             // Battery Status
             Rectangle {
                 width: parent.width
                 height: 60
-                radius: 8
-                color: "#2a2a2a"
+                radius: Theme.radiusMedium
+                color: Theme.surface
                 
                 Row {
                     anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 10
+                    anchors.margins: Theme.marginDefault
+                    spacing: Theme.marginDefault
                     
-                    // Battery semi-circle indicator
+                    // Battery circle indicator
                     Item {
                         width: 50
                         height: 50
@@ -112,41 +113,26 @@ PopupWindow {
                                 var startAngle = -Math.PI / 2
                                 var fillAngle = startAngle + (2 * Math.PI * (batteryLevel / 100))
                                 
-                                // Background circle
                                 ctx.beginPath()
                                 ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false)
-                                ctx.strokeStyle = "#404040"
+                                ctx.strokeStyle = Theme.surfaceHover
                                 ctx.lineWidth = 3
                                 ctx.stroke()
                                 
-                                // Filled arc based on battery level
                                 ctx.beginPath()
                                 ctx.arc(centerX, centerY, radius, startAngle, fillAngle, false)
-                                ctx.strokeStyle = batteryLevel <= 20 && !batteryCharging ? "#ff6b6b" : "#ffffff"
+                                ctx.strokeStyle = batteryLevel <= 20 && !batteryCharging ? Theme.textDanger : Theme.accent
                                 ctx.lineWidth = 3
                                 ctx.stroke()
                             }
                         }
                         
                         Text {
-                            property string batteryIcon: {
-                                if (batteryCharging) return "󰂄"
-                                if (batteryLevel >= 90) return "󰁹"
-                                if (batteryLevel >= 80) return "󰂂"
-                                if (batteryLevel >= 70) return "󰂁"
-                                if (batteryLevel >= 60) return "󰂀"
-                                if (batteryLevel >= 50) return "󰁿"
-                                if (batteryLevel >= 40) return "󰁾"
-                                if (batteryLevel >= 30) return "󰁽"
-                                if (batteryLevel >= 20) return "󰁼"
-                                if (batteryLevel >= 10) return "󰁻"
-                                return "󰁺"
-                            }
                             anchors.centerIn: parent
-                            text: batteryIcon
-                            font.pixelSize: 20
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: batteryLevel <= 20 && !batteryCharging ? "#ff6b6b" : "#ffffff"
+                            text: Theme.getBatteryIcon(batteryLevel, batteryCharging)
+                            font.pixelSize: Theme.fontSizeXLarge
+                            font.family: Theme.fontFamily
+                            color: batteryLevel <= 20 && !batteryCharging ? Theme.textDanger : Theme.textPrimary
                         }
                         
                         Timer {
@@ -158,38 +144,29 @@ PopupWindow {
                     }
                     
                     Column {
-                        spacing: 4
+                        spacing: Theme.spacingSmall
                         anchors.verticalCenter: parent.verticalCenter
                         
                         Text {
                             text: batteryLevel + "%"
-                            font.pixelSize: 20
-                            font.family: "JetBrains Mono Nerd Font"
+                            font.pixelSize: Theme.fontSizeXLarge
+                            font.family: Theme.fontFamily
                             font.bold: true
-                            color: "#ffffff"
+                            color: Theme.textPrimary
                         }
                         
                         Text {
                             text: batteryCharging ? "Charging" : "Discharging"
-                            font.pixelSize: 10
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#888888"
+                            font.pixelSize: Theme.fontSizeSmall
+                            font.family: Theme.fontFamily
+                            color: Theme.textSecondary
                         }
                         
                         Text {
-                            function formatUptime(seconds) {
-                                var days = Math.floor(seconds / 86400)
-                                var hours = Math.floor((seconds % 86400) / 3600)
-                                var mins = Math.floor((seconds % 3600) / 60)
-                                if (days > 0) {
-                                    return days + "d " + hours + "h"
-                                }
-                                return hours + "h " + mins + "m uptime"
-                            }
-                            text: formatUptime(systemUptime)
+                            text: Theme.formatUptime(systemUptime)
                             font.pixelSize: 9
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#666666"
+                            font.family: Theme.fontFamily
+                            color: Theme.textDisabled
                         }
                     }
                 }
@@ -199,18 +176,18 @@ PopupWindow {
             Text {
                 text: powerProfilesAvailable ? "Power Profile" : "Power Profiles Unavailable"
                 font.pixelSize: 11
-                font.family: "JetBrains Mono Nerd Font"
+                font.family: Theme.fontFamily
                 font.bold: true
-                color: "#888888"
+                color: Theme.textSecondary
             }
             
             // Info message when unavailable
             Text {
                 width: parent.width
                 text: "Install and enable power-profiles-daemon"
-                font.pixelSize: 10
-                font.family: "JetBrains Mono Nerd Font"
-                color: "#666666"
+                font.pixelSize: Theme.fontSizeSmall
+                font.family: Theme.fontFamily
+                color: Theme.textDisabled
                 wrapMode: Text.WordWrap
                 visible: !powerProfilesAvailable
             }
@@ -218,143 +195,58 @@ PopupWindow {
             // Power Profiles
             Column {
                 width: parent.width
-                spacing: 6
+                spacing: Theme.radiusSmall
                 visible: powerProfilesAvailable
                 
-                Rectangle {
-                    width: parent.width
-                    height: 32
-                    radius: 6
-                    color: powerProfile === "performance" ? "#404040" : (perfMouseArea.containsMouse ? "#353535" : "#2a2a2a")
+                Repeater {
+                    model: [
+                        { id: "performance", icon: "󱐋", label: "Performance" },
+                        { id: "balanced", icon: "󰾅", label: "Balanced" },
+                        { id: "power-saver", icon: "󰌪", label: "Power Saver" }
+                    ]
                     
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 6
-                        spacing: 8
+                    Rectangle {
+                        width: parent.width
+                        height: 32
+                        radius: Theme.radiusSmall
+                        color: powerProfile === modelData.id ? Theme.surfaceHover : 
+                               (profileMouseArea.containsMouse ? Theme.surfaceSubtle : Theme.surface)
                         
-                        Text {
-                            text: "󱐋"
-                            font.pixelSize: 14
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#ffffff"
-                        }
-                        
-                        Text {
-                            text: "Performance"
-                            font.pixelSize: 12
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#ffffff"
-                            Layout.fillWidth: true
-                        }
-                        
-                        Text {
-                            text: "󰄬"
-                            font.pixelSize: 12
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#ffffff"
-                            visible: powerProfile === "performance"
-                        }
-                    }
-                    
-                    MouseArea {
-                        id: perfMouseArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            batteryMenuWindow.setProfile("performance")
-                        }
-                    }
-                }
-                
-                Rectangle {
-                    width: parent.width
-                    height: 32
-                    radius: 6
-                    color: powerProfile === "balanced" ? "#404040" : (balMouseArea.containsMouse ? "#353535" : "#2a2a2a")
-                    
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 6
-                        spacing: 8
-                        
-                        Text {
-                            text: "󰾅"
-                            font.pixelSize: 14
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#ffffff"
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: Theme.radiusSmall
+                            spacing: Theme.spacingMedium
+                            
+                            Text {
+                                text: modelData.icon
+                                font.pixelSize: Theme.fontSizeMedium
+                                font.family: Theme.fontFamily
+                                color: Theme.textPrimary
+                            }
+                            
+                            Text {
+                                text: modelData.label
+                                font.pixelSize: Theme.fontSizeDefault
+                                font.family: Theme.fontFamily
+                                color: Theme.textPrimary
+                                Layout.fillWidth: true
+                            }
+                            
+                            Text {
+                                text: "�"
+                                font.pixelSize: Theme.fontSizeDefault
+                                font.family: Theme.fontFamily
+                                color: Theme.textPrimary
+                                visible: powerProfile === modelData.id
+                            }
                         }
                         
-                        Text {
-                            text: "Balanced"
-                            font.pixelSize: 12
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#ffffff"
-                            Layout.fillWidth: true
-                        }
-                        
-                        Text {
-                            text: "󰄬"
-                            font.pixelSize: 12
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#ffffff"
-                            visible: powerProfile === "balanced"
-                        }
-                    }
-                    
-                    MouseArea {
-                        id: balMouseArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            batteryMenuWindow.setProfile("balanced")
-                        }
-                    }
-                }
-                
-                Rectangle {
-                    width: parent.width
-                    height: 32
-                    radius: 6
-                    color: powerProfile === "power-saver" ? "#404040" : (saverMouseArea.containsMouse ? "#353535" : "#2a2a2a")
-                    
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 6
-                        spacing: 8
-                        
-                        Text {
-                            text: "󰌪"
-                            font.pixelSize: 14
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#ffffff"
-                        }
-                        
-                        Text {
-                            text: "Power Saver"
-                            font.pixelSize: 12
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#ffffff"
-                            Layout.fillWidth: true
-                        }
-                        
-                        Text {
-                            text: "󰄬"
-                            font.pixelSize: 12
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: "#ffffff"
-                            visible: powerProfile === "power-saver"
-                        }
-                    }
-                    
-                    MouseArea {
-                        id: saverMouseArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            batteryMenuWindow.setProfile("power-saver")
+                        MouseArea {
+                            id: profileMouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: batteryMenuWindow.setProfile(modelData.id)
                         }
                     }
                 }
