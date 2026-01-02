@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import ".."
 
 PopupWindow {
     id: brightnessMenuWindow
@@ -21,7 +22,7 @@ PopupWindow {
     height: 240
 
     anchor.window: barWindow
-    anchor.rect.x: barWindow.width - width - 15  // Align with right bar
+    anchor.rect.x: barWindow.width - width - 15
     anchor.rect.y: barExpanded ? 40 : 15
     anchor.rect.width: width
     anchor.rect.height: height
@@ -37,14 +38,14 @@ PopupWindow {
         Behavior on scale {
             NumberAnimation {
                 id: brightnessCloseAnim
-                duration: 200
+                duration: Theme.animationDurationNormal
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
 
         Behavior on opacity {
             NumberAnimation {
-                duration: 150
+                duration: Theme.animationDurationFast
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
@@ -56,14 +57,14 @@ PopupWindow {
             onPaint: {
                 var ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
-                ctx.fillStyle = "#1a1a1a"
+                ctx.fillStyle = Theme.background
 
-                var radius = 20
+                var radius = Theme.radiusFull
 
                 ctx.beginPath()
                 ctx.moveTo(0, 0)
                 ctx.lineTo(width, 0)
-                ctx.lineTo(width, height)  // Straight line to bottom-right (no curve)
+                ctx.lineTo(width, height)
                 ctx.lineTo(radius, height)
                 ctx.arcTo(0, height, 0, height - radius, radius)
                 ctx.lineTo(0, 0)
@@ -77,19 +78,19 @@ PopupWindow {
 
         Column {
             anchors.fill: parent
-            anchors.margins: 10
-            spacing: 12
+            anchors.margins: Theme.marginDefault
+            spacing: Theme.spacingLarge
 
             // Brightness Icon
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "󰃠"
-                font.pixelSize: 24
-                font.family: "JetBrains Mono Nerd Font"
-                color: "#ffffff"
+                font.pixelSize: Theme.fontSizeIconLarge
+                font.family: Theme.fontFamily
+                color: Theme.textPrimary
             }
 
-            Item { height: 5 } // Extra space above slider
+            Item { height: 5 }
 
             // Vertical Slider
             Item {
@@ -102,7 +103,7 @@ PopupWindow {
                     width: 8
                     height: parent.height
                     radius: 4
-                    color: "#404040"
+                    color: Theme.surfaceHover
 
                     Rectangle {
                         id: sliderFill
@@ -111,17 +112,16 @@ PopupWindow {
                         width: parent.width
                         height: parent.height * (targetBrightnessLevel / 100)
                         radius: 4
-                        color: "#ffffff"
+                        color: Theme.accent
                     }
                 }
 
-                // Slider handle
                 Rectangle {
                     id: sliderHandle
                     width: 20
                     height: 20
                     radius: 10
-                    color: "#ffffff"
+                    color: Theme.accent
                     anchors.horizontalCenter: parent.horizontalCenter
                     property bool localDragging: false
                     property real dragStartMouseY: 0
@@ -179,9 +179,7 @@ PopupWindow {
                 MouseArea {
                     anchors.fill: parent
                     z: -1
-                    enabled: true
                     onClicked: (mouse) => {
-                        // compute relative position using the track bounds so clicks are precise
                         var rel = mouse.y - sliderTrack.y
                         var denom = Math.max(1, (sliderTrack.height - sliderHandle.height))
                         var percentage = 100 - Math.round((rel / denom) * 100)
@@ -190,14 +188,6 @@ PopupWindow {
                     }
                 }
             }
-        }
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        z: -100
-        onClicked: {
-            // Prevent clicks from passing through
         }
     }
 }
