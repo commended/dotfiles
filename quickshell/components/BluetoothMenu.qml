@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import ".."
 
 PopupWindow {
     id: bluetoothMenuWindow
@@ -36,14 +37,14 @@ PopupWindow {
         Behavior on scale {
             NumberAnimation {
                 id: btCloseAnim
-                duration: 200
+                duration: Theme.animationDurationNormal
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
         
         Behavior on opacity {
             NumberAnimation {
-                duration: 150
+                duration: Theme.animationDurationFast
                 easing.type: menuOpen ? Easing.OutCubic : Easing.InCubic
             }
         }
@@ -55,9 +56,9 @@ PopupWindow {
             onPaint: {
                 var ctx = getContext("2d")
                 ctx.clearRect(0, 0, width, height)
-                ctx.fillStyle = "#1a1a1a"
+                ctx.fillStyle = Theme.background
                 
-                var radius = 20
+                var radius = Theme.radiusFull
                 
                 ctx.beginPath()
                 ctx.moveTo(0, 0)
@@ -80,59 +81,32 @@ PopupWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: 10
-            spacing: 8
+            anchors.margins: Theme.marginDefault
+            spacing: Theme.spacingMedium
             
             // Bluetooth Toggle
             Rectangle {
                 width: parent.width
                 height: 40
-                radius: 8
-                color: "#2a2a2a"
+                radius: Theme.radiusMedium
+                color: Theme.surface
                 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 8
+                    anchors.margins: Theme.spacingMedium
                     
                     Text {
                         text: "󰂯  Bluetooth"
-                        font.pixelSize: 14
-                        font.family: "JetBrains Mono Nerd Font"
-                        color: "#ffffff"
+                        font.pixelSize: Theme.fontSizeMedium
+                        font.family: Theme.fontFamily
+                        color: Theme.textPrimary
                     }
                     
                     Item { Layout.fillWidth: true }
                     
-                    Rectangle {
-                        width: 40
-                        height: 22
-                        radius: 11
-                        color: bluetoothEnabled ? "#ffffff" : "#404040"
-                        
-                        Behavior on color {
-                            ColorAnimation { duration: 150 }
-                        }
-                        
-                        Rectangle {
-                            width: 18
-                            height: 18
-                            radius: 9
-                            color: bluetoothEnabled ? "#1a1a1a" : "#ffffff"
-                            anchors.verticalCenter: parent.verticalCenter
-                            x: bluetoothEnabled ? parent.width - width - 2 : 2
-                            
-                            Behavior on x {
-                                NumberAnimation { duration: 150 }
-                            }
-                        }
-                        
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                bluetoothMenuWindow.toggleBluetooth(!bluetoothEnabled)
-                            }
-                        }
+                    ToggleSwitch {
+                        checked: bluetoothEnabled
+                        onToggled: (value) => bluetoothMenuWindow.toggleBluetooth(value)
                     }
                 }
             }
@@ -141,8 +115,8 @@ PopupWindow {
             Rectangle {
                 width: parent.width
                 height: 32
-                radius: 6
-                color: "#2a2a2a"
+                radius: Theme.radiusSmall
+                color: Theme.surface
                 
                 Text {
                     anchors.centerIn: parent
@@ -153,9 +127,9 @@ PopupWindow {
                         return false
                     }
                     text: bluetoothEnabled ? (anyConnected ? "󰂱 Connected" : "󰂲 Disconnected") : "󰂲 Bluetooth Off"
-                    font.pixelSize: 12
-                    font.family: "JetBrains Mono Nerd Font"
-                    color: anyConnected ? "#ffffff" : "#888888"
+                    font.pixelSize: Theme.fontSizeDefault
+                    font.family: Theme.fontFamily
+                    color: anyConnected ? Theme.textPrimary : Theme.textSecondary
                 }
             }
             
@@ -163,7 +137,7 @@ PopupWindow {
             Rectangle {
                 width: parent.width
                 height: 1
-                color: "#404040"
+                color: Theme.separator
                 visible: bluetoothEnabled && bluetoothDevices.length > 0
             }
             
@@ -173,29 +147,29 @@ PopupWindow {
                 Rectangle {
                     width: btDevicesList.width
                     height: 36
-                    radius: 4
-                    color: btDeviceMouseArea.containsMouse ? "#505050" : (modelData.connected ? "#404040" : "#2a2a2a")
+                    radius: Theme.spacingSmall
+                    color: btDeviceMouseArea.containsMouse ? Theme.surfaceActive : (modelData.connected ? Theme.surfaceHover : Theme.surface)
                     visible: bluetoothEnabled
                     
                     RowLayout {
                         anchors.fill: parent
                         anchors.margins: 5
-                        spacing: 8
+                        spacing: Theme.spacingMedium
                         
                         Text {
                             text: modelData.name
-                            font.pixelSize: 12
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: modelData.connected ? "#ffffff" : "#ffffff"
+                            font.pixelSize: Theme.fontSizeDefault
+                            font.family: Theme.fontFamily
+                            color: Theme.textPrimary
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                         }
                         
                         Text {
                             text: modelData.connected ? "󰂱" : "󰂯"
-                            font.pixelSize: 12
-                            font.family: "JetBrains Mono Nerd Font"
-                            color: modelData.connected ? "#ffffff" : "#888888"
+                            font.pixelSize: Theme.fontSizeDefault
+                            font.family: Theme.fontFamily
+                            color: modelData.connected ? Theme.textPrimary : Theme.textSecondary
                         }
                     }
                     
@@ -218,9 +192,9 @@ PopupWindow {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: bluetoothEnabled ? "No devices found" : "Bluetooth disabled"
-                font.pixelSize: 12
-                font.family: "JetBrains Mono Nerd Font"
-                color: "#888888"
+                font.pixelSize: Theme.fontSizeDefault
+                font.family: Theme.fontFamily
+                color: Theme.textSecondary
                 visible: !bluetoothEnabled || bluetoothDevices.length === 0
             }
         }
