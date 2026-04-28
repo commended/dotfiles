@@ -22,7 +22,7 @@ PopupWindow {
     height: powerProfilesAvailable ? 240 : 140
     
     anchor.window: barWindow
-    anchor.rect.x: barWindow.width - width - 15
+    anchor.rect.x: barWindow.width - width
     anchor.rect.y: barExpanded ? 40 : 15
     anchor.rect.width: width
     anchor.rect.height: height
