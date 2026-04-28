@@ -22,7 +22,7 @@ PopupWindow {
     height: 240
 
     anchor.window: barWindow
-    anchor.rect.x: barWindow.width - width - 15
+    anchor.rect.x: barWindow.width - width
     anchor.rect.y: barExpanded ? 40 : 15
     anchor.rect.width: width
     anchor.rect.height: height
@@ -81,7 +81,6 @@ PopupWindow {
             anchors.margins: Theme.marginDefault
             spacing: Theme.spacingLarge
 
-            // Brightness Icon
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "󰃠"
@@ -92,7 +91,6 @@ PopupWindow {
 
             Item { height: 5 }
 
-            // Vertical Slider
             Item {
                 width: parent.width
                 height: parent.height - 53
