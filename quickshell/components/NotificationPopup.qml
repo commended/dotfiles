@@ -8,8 +8,8 @@ PopupWindow {
     required property var barWindow
     required property bool barExpanded
     required property bool notifVisible
-    required property string notificationType  // "volume", "brightness", "bluetooth"
-    required property int value  // percentage for volume/brightness
+    required property string notificationType
+    required property int value
     required property string bluetoothDeviceName
     required property bool bluetoothConnected
     
@@ -18,7 +18,7 @@ PopupWindow {
     height: 70
     
     anchor.window: barWindow
-    anchor.rect.x: barWindow.width - width - 15
+    anchor.rect.x: barWindow.width - width
     anchor.rect.y: barExpanded ? 40 : 15
     anchor.rect.width: width
     anchor.rect.height: height
@@ -45,45 +45,6 @@ PopupWindow {
             }
         }
         
-        // Top connector - connects to top bar
-        Canvas {
-            id: topConnector
-            x: 0
-            y: 0
-            width: parent.width
-            height: 1
-            visible: false
-        }
-        
-        // Right connector - connects to right bar
-        Canvas {
-            id: rightConnector
-            anchors.left: parent.right
-            y: 0
-            width: 15
-            height: parent.height + 30
-            
-            onPaint: {
-                var ctx = getContext("2d")
-                ctx.clearRect(0, 0, width, height)
-                ctx.fillStyle = "#1a1a1a"
-                
-                ctx.beginPath()
-                ctx.moveTo(0, 0)
-                ctx.lineTo(width, 0)
-                ctx.lineTo(width, height)
-                ctx.lineTo(0, height)
-                var radius = 20
-                ctx.arcTo(0, height, 0, 0, radius)
-                ctx.closePath()
-                ctx.fill()
-            }
-            
-            onWidthChanged: requestPaint()
-            onHeightChanged: requestPaint()
-        }
-        
-        // Main notification card with canvas for custom rounding
         Canvas {
             id: mainCard
             anchors.fill: parent
@@ -96,17 +57,11 @@ PopupWindow {
                 var radius = 20
                 
                 ctx.beginPath()
-                // Start at top-left
                 ctx.moveTo(0, 0)
-                // Line to top-right
                 ctx.lineTo(width, 0)
-                // Line to bottom-right
                 ctx.lineTo(width, height)
-                // Line to near bottom-left corner
                 ctx.lineTo(radius, height)
-                // Rounded bottom-left corner
                 ctx.arcTo(0, height, 0, height - radius, radius)
-                // Line back to top-left
                 ctx.lineTo(0, 0)
                 ctx.closePath()
                 ctx.fill()
@@ -116,7 +71,6 @@ PopupWindow {
             onHeightChanged: requestPaint()
         }
         
-        // Content on top of the canvas
         Item {
             anchors.fill: parent
             
@@ -125,7 +79,6 @@ PopupWindow {
                 anchors.margins: 12
                 spacing: 12
                 
-                // Icon/Thumbnail
                 Rectangle {
                     Layout.preferredWidth: 46
                     Layout.preferredHeight: 46
@@ -154,7 +107,6 @@ PopupWindow {
                     }
                 }
                 
-                // Text content
                 Column {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
@@ -195,7 +147,6 @@ PopupWindow {
                         width: parent.width
                     }
                     
-                    // Small progress bar
                     Rectangle {
                         width: parent.width
                         height: 3
