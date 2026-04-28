@@ -39,7 +39,7 @@ PanelWindow {
         bottom: barExpanded ? 0 : -35
     }
     
-    exclusiveZone: barExpanded ? 50 : 15
+    exclusiveZone: barExpanded ? 50: 15
     
     color: "transparent"
     
@@ -368,43 +368,6 @@ PanelWindow {
                         if (barExpanded) bar.openCalendarMenu()
                     }
                 }
-            }
-        }
-        
-        // Right corner arch connector
-        Item {
-            anchors {
-                top: mainBar.bottom
-                right: parent.right
-            }
-            width: 55
-            height: barExpanded ? 120 : 40
-            
-            Behavior on height {
-                NumberAnimation {
-                    duration: Theme.animationDurationSlow
-                    easing.type: Easing.InOutCubic
-                }
-            }
-            
-            Canvas {
-                anchors.fill: parent
-                onPaint: {
-                    var ctx = getContext("2d")
-                    ctx.clearRect(0, 0, width, height)
-                    ctx.fillStyle = Theme.background
-                    ctx.beginPath()
-                    ctx.moveTo(width, height)
-                    ctx.lineTo(width, 0)
-                    ctx.lineTo(0, 0)
-                    var radius = width * 1.0
-                    ctx.arcTo(width, 0, width, height, radius)
-                    ctx.lineTo(width, height)
-                    ctx.closePath()
-                    ctx.fill()
-                }
-                onWidthChanged: requestPaint()
-                onHeightChanged: requestPaint()
             }
         }
         
