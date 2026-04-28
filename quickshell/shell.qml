@@ -12,8 +12,6 @@ ShellRoot {
     // ===== BAR STATE =====
     property bool barExpanded: true
     property bool trayCollapsed: false
-    property bool rightBarExpanded: false
-    property bool rightTrayCollapsed: false
     
     // ===== MENU STATE =====
     property bool volumeMenuOpen: false
@@ -162,18 +160,15 @@ ShellRoot {
         repeat: true
         onTriggered: {
             if (previousBluetoothDevices.length === 0 || bluetoothMenuOpen) {
-                // Skip if not initialized or menu is open
                 return
             }
             
             var currentDevices = bluetoothService.bluetoothDevices
             
-            // Check for connection state changes
             for (var i = 0; i < currentDevices.length; i++) {
                 var device = currentDevices[i]
                 var previousDevice = null
                 
-                // Find the previous state of this device
                 for (var j = 0; j < previousBluetoothDevices.length; j++) {
                     if (previousBluetoothDevices[j].mac === device.mac) {
                         previousDevice = previousBluetoothDevices[j]
@@ -181,15 +176,13 @@ ShellRoot {
                     }
                 }
                 
-                // Show notification if connection state changed
                 if (previousDevice && device.connected !== previousDevice.connected) {
                     console.log("Bluetooth state changed:", device.name, device.connected)
                     showNotification("bluetooth", 0, device.name, device.connected)
-                    break  // Only show one notification at a time
+                    break
                 }
             }
             
-            // Save current state for next comparison
             previousBluetoothDevices = JSON.parse(JSON.stringify(currentDevices))
         }
     }
@@ -343,27 +336,6 @@ ShellRoot {
         }
     }
     
-    // ===== POWER MENU =====
-    PowerMenu {
-        barWindow: rightBar
-        menuOpen: rightBarExpanded
-        
-        onLockClicked: {
-            root.rightBarExpanded = false
-            Quickshell.execDetached(["hyprlock"])
-        }
-        
-        onRestartClicked: {
-            root.rightBarExpanded = false
-            Quickshell.execDetached(["reboot"])
-        }
-        
-        onPowerClicked: {
-            root.rightBarExpanded = false
-            Quickshell.execDetached(["shutdown", "now"])
-        }
-    }
-    
     // ===== MAIN BAR =====
     Bar {
         id: bar
@@ -386,20 +358,5 @@ ShellRoot {
         onOpenBatteryMenu: root.toggleMenu("battery")
         onOpenCalendarMenu: root.toggleMenu("calendar")
         onOpenBrightnessMenu: root.toggleMenu("brightness")
-    }
-    
-    // ===== RIGHT BAR =====
-    RightBar {
-        id: rightBar
-        barExpanded: root.barExpanded
-        rightBarExpanded: root.rightBarExpanded
-        rightTrayCollapsed: root.rightTrayCollapsed
-        
-        onToggleRightBar: {
-            root.rightBarExpanded = !root.rightBarExpanded
-            root.closeAllMenus()
-        }
-        
-        onToggleRightTrayCollapsed: root.rightTrayCollapsed = !root.rightTrayCollapsed
     }
 }
